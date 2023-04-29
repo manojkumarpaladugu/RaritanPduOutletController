@@ -1,6 +1,12 @@
 # Raritan PDU Outlet Controller
 
+### How to use?
+    1. Add PDU - Outlet configuration in PduConfig.Json
+    2. [Optional] Adjust application settings in assets/AppConfig.json
+    3. Open RaritanPduOutletController.exe
 
+### Screenshot
+<img src="https://github.com/manojkumarpaladugu/RaritanPduOutletController/blob/main/assets/RaritanPduOutletController.jpg" width="600"/>
 
 ### Install Below PIP Packages:
     pip3 install raritan
