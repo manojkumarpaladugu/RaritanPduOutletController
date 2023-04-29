@@ -18,5 +18,5 @@
     2. Copy customtkinter path from the output of "pip3 show customtkinter"
     3. pyinstaller --noconfirm --onefile --windowed --icon=assets\PlugSocket.ico --add-data "c:\users\<username>\appdata\local\programs\python\python39\lib\site-packages\customtkinter;customtkinter\" 'RaritanPduOutletController.py'
     4. cp -r assets dist/assets
-    5. cp PduConfig.json dist/PduConfig.json
+    5. cp PduOutletConfig.json dist/PduOutletConfig.json
     6. RaritanPduOutletController.exe will be in 'dist' directory
