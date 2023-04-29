@@ -1,7 +1,7 @@
 # Raritan PDU Outlet Controller
 
 ### How to use?
-    1. Add PDU - Outlet configuration in PduConfig.Json
+    1. Add PDU - Outlet configuration in PduOutletConfig.Json
     2. [Optional] Adjust application settings in assets/AppConfig.json
     3. Open RaritanPduOutletController.exe
 

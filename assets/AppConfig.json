@@ -11,6 +11,6 @@
             "Group Frame"      : "#eceeee",
             "Group Frame Text" : "black"
         },
-        "PDU Configuration File" : "PduConfig.json"
+        "PDU Configuration File" : "PduOutletConfig.json"
     }
 }
