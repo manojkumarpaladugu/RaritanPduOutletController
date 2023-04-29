@@ -237,7 +237,7 @@ class PduOutletController:
         for pdu in self.pduMap.values():
             outlets = self.ConnectToPdu(pdu)
             if outlets == None:
-                return
+                continue
             for outletGroup in pdu.outletGroups.values():
                 for outlet in outletGroup.values():
                     outletNumber = outlet.number - 1
