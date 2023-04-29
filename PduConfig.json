@@ -6,13 +6,13 @@
             "Password"   : "admin@123",
             "Model"      : "/model/pdu/0",
             "Outlet-Groups"  : {
-                "Group 1": {
+                "Outlet Group 1": {
                     "Dev PC"  : "24",
                     "Host PC" : "23",
                     "EVB"     : "22",
                     "DSTREAM" : "21"
                 },
-                "Group 2": {
+                "Outlet Group 2": {
                     "Dev PC"  : "20",
                     "Host PC" : "19",
                     "EVB"     : "18",
@@ -26,13 +26,13 @@
             "Password"   : "admin@123",
             "Model"      : "/model/pdu/0",
             "Outlet-Groups"  : {
-                "Group 1": {
+                "Outlet Group 1": {
                     "Dev PC"  : "25",
                     "Host PC" : "26",
                     "EVB"     : "27",
                     "DSTREAM" : "28"
                 },
-                "Group 2": {
+                "Outlet Group 2": {
                     "Dev PC"  : "29",
                     "Host PC" : "30",
                     "EVB"     : "31",
