@@ -1,0 +1,16 @@
+{
+    "Application" : {
+        "Width"  : 540,
+        "Height" : 500,
+        "Icon"   : "app\\PlugSocket.ico",
+        "Theme"  : {
+            "Static Frame"     : "white",
+            "Scrollable Frame" : "white",
+            "PDU Frame"        : "#46555b",
+            "PDU Frame Text"   : "white",
+            "Group Frame"      : "#eceeee",
+            "Group Frame Text" : "black"
+        },
+        "PDU Configuration File" : "PduConfig.json"
+    }
+}
