@@ -2,7 +2,7 @@
     "Application" : {
         "Width"  : 540,
         "Height" : 500,
-        "Icon"   : "app\\PlugSocket.ico",
+        "Icon"   : "assets\\PlugSocket.ico",
         "Theme"  : {
             "Static Frame"     : "white",
             "Scrollable Frame" : "white",
