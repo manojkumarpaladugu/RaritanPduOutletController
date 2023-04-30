@@ -10,7 +10,6 @@ from raritan.rpc import pdumodel
 
 VERSION                = '1.0.1'
 BUTTON_ACTIVE_COLOR    = '#3a7ebf'
-NEW_LINE               = '\n'
 APP_CONFIGURATION_FILE = os.path.join('assets', 'AppConfig.json')
 
 @dataclass
