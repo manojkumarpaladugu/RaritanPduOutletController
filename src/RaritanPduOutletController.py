@@ -15,10 +15,10 @@ class RaritanPduOutletController:
         return outlets
 
     def IsOutletPowerOn(self, outlet):
-        outlet.getState().powerState == pdumodel.Outlet.PowerState.PS_ON
+        return outlet.getState().powerState == pdumodel.Outlet.PowerState.PS_ON
 
     def IsOutletPowerOff(self, outlet):
-        outlet.getState().powerState == pdumodel.Outlet.PowerState.PS_OFF
+        return outlet.getState().powerState == pdumodel.Outlet.PowerState.PS_OFF
 
     def PowerOnOutlet(self, outlet):
         if (outlet.getState().switchOnInProgress) or \

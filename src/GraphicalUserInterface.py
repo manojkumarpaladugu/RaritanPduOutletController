@@ -43,7 +43,8 @@ class PduOutletController:
         self.applicationName   = 'Raritan PDU Outlet Controller'
         self.applicationWidth  = appConfig['Application']['Width']
         self.applicationHeight = appConfig['Application']['Height']
-        self.applicationIcon   = appConfig['Application']['Icon']
+        if os.name == 'nt': # Windows OS
+            self.applicationIcon   = appConfig['Application']['Icon']
         self.applicationTheme  = Theme(appConfig['Application']['Theme']['Static Frame'],
                                        appConfig['Application']['Theme']['Scrollable Frame'],
                                        appConfig['Application']['Theme']['PDU Frame'],
@@ -89,7 +90,8 @@ class PduOutletController:
         customtkinter.set_default_color_theme('dark-blue')  # Themes: "blue" (standard), "green", "dark-blue"
         self.gui.title(self.applicationName)
         self.gui.resizable(False, False)
-        self.gui.wm_iconbitmap(self.applicationIcon)
+        if os.name == 'nt': # Windows OS
+            self.gui.wm_iconbitmap(self.applicationIcon)
 
         staticFrame = customtkinter.CTkFrame(self.gui,
                                              width=self.applicationWidth,
@@ -208,7 +210,8 @@ class PduOutletController:
         popUpWindow = customtkinter.CTkToplevel(self.gui)
         popUpWindow.title(title)
         # CtkTopLevel class set window icon after 200 ms. To overcome it, we should delay call to wm_iconbitmap(...).
-        popUpWindow.after(205, lambda: popUpWindow.wm_iconbitmap(self.applicationIcon))
+        if os.name == 'nt': # Windows OS
+            popUpWindow.after(205, lambda: popUpWindow.wm_iconbitmap(self.applicationIcon))
         popUpWindow.resizable(False, False)
         label = customtkinter.CTkLabel(popUpWindow,
                                        text=message)
@@ -248,7 +251,8 @@ class PduOutletController:
         aboutWindow.geometry('{0}x{1}'.format(windowWidth, windowHeight))
         aboutWindow.title('About')
         # CtkTopLevel class set window icon after 200 ms. To overcome it, we should delay call to wm_iconbitmap(...)
-        aboutWindow.after(205, lambda: aboutWindow.wm_iconbitmap(self.applicationIcon))
+        if os.name == 'nt': # Windows OS
+            aboutWindow.after(205, lambda: aboutWindow.wm_iconbitmap(self.applicationIcon))
         aboutWindow.resizable(False, False)
 
         frame = customtkinter.CTkFrame(aboutWindow,
@@ -299,6 +303,7 @@ class PduOutletController:
         y = self.gui.winfo_y() + self.gui.winfo_height() // 2 - aboutWindow.winfo_height() // 2
         aboutWindow.geometry("+%d+%d" %(x,y))
         aboutWindow.wm_transient(self.gui)   # Keep the toplevel window in front of the root window
+        aboutWindow.wait_visibility()
         aboutWindow.grab_set()
 
     def PowerOnOutlet(self, pdu, outlet):
