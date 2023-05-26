@@ -1,5 +1,5 @@
-from   raritan     import rpc
-from   raritan.rpc import pdumodel
+from raritan     import rpc
+from raritan.rpc import pdumodel
 
 class RaritanPduOutletController:
     def __init__(self, pduModel, pduIpAddress, pduUsername, pduPassword):
