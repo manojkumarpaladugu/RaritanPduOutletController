@@ -30,6 +30,7 @@ pyinstaller                              `
     --specpath $OUT_DIR/$CLI_APP_NAME    `
     --distpath $BIN_DIR                  `
     --name $GUI_APP_NAME                 `
+    --add-data "$ICON_FILE;assets"       `
     --icon=$ICON_FILE                    `
     --collect-all customtkinter          `
     --noconfirm                          `
@@ -42,8 +43,7 @@ pyinstaller                              `
 "-----------------------"
 New-Item  -Path $OUT_ASSETS_DIR                    -ItemType    Directory
 Copy-Item -Path "$ASSETS_DIR\AppConfig.json"       -Destination $OUT_ASSETS_DIR -PassThru
-Copy-Item -Path "$ASSETS_DIR\PlugSocket.ico"       -Destination $OUT_ASSETS_DIR -PassThru
-Copy-Item -Path "$ASSETS_DIR\PduOutletConfig.json" -Destination $BIN_DIR        -PassThru
+Copy-Item -Path "$ASSETS_DIR\PduOutletConfig.json" -Destination $OUT_ASSETS_DIR -PassThru
 
 # cleaning up
 Remove-Item $OUT_DIR/$CLI_APP_NAME -Recurse

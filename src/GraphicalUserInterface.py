@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import threading
 import functools
@@ -44,7 +45,7 @@ class PduOutletController:
         self.applicationWidth  = appConfig['Application']['Width']
         self.applicationHeight = appConfig['Application']['Height']
         if os.name == 'nt': # Windows OS
-            self.applicationIcon   = appConfig['Application']['Icon']
+            self.applicationIcon = self.GetResourcePath(appConfig['Application']['Icon'])
         self.applicationTheme  = Theme(appConfig['Application']['Theme']['Static Frame'],
                                        appConfig['Application']['Theme']['Scrollable Frame'],
                                        appConfig['Application']['Theme']['PDU Frame'],
@@ -59,6 +60,11 @@ class PduOutletController:
             configuration = json.load(jsonFile)
             jsonFile.close()
         return configuration
+
+    def GetResourcePath(self, relativePath):
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        basePath = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        return os.path.join(basePath, relativePath)
 
     def PopulatePduOutlets(self):
         pduConfig = self.LoadConfiguration(self.pduConfigFile)
@@ -224,22 +230,23 @@ class PduOutletController:
 
     def RefreshButtonCallback(self):
         # Update outlet power status
-        try:
-            for pdu in self.pduMap.values():
+        for pdu in self.pduMap.values():
+            try:
                 outlets = pdu.outletController.ConnectToPdu()
-                for outletGroup in pdu.outletGroups.values():
-                    for outlet in outletGroup.values():
-                        outletNumber = outlet.number - 1
-                        if (pdu.outletController.IsOutletPowerOn(outlets[outletNumber])):
-                            outlet.powerStatusLabel.configure(text='ON', text_color='green')
-                        elif (pdu.outletController.IsOutletPowerOff(outlets[outletNumber])):
-                            outlet.powerStatusLabel.configure(text='OFF', text_color='red')
-                        else:
-                            outlet.powerStatusLabel.configure(text='-', text_color='black')
-            self.gui.unbind('<Visibility>')
-        except:
-            self.OpenPopUpWindow('Error',
-                                 'Unable to establish connection at https://{}'.format(pdu.ipAddress))
+            except:
+                self.OpenPopUpWindow('Error',
+                                    'Unable to establish connection at https://{}'.format(pdu.ipAddress))
+                continue
+            for outletGroup in pdu.outletGroups.values():
+                for outlet in outletGroup.values():
+                    outletNumber = outlet.number - 1
+                    if (pdu.outletController.IsOutletPowerOn(outlets[outletNumber])):
+                        outlet.powerStatusLabel.configure(text='ON', text_color='green')
+                    elif (pdu.outletController.IsOutletPowerOff(outlets[outletNumber])):
+                        outlet.powerStatusLabel.configure(text='OFF', text_color='red')
+                    else:
+                        outlet.powerStatusLabel.configure(text='-', text_color='black')
+        self.gui.unbind('<Visibility>')
 
     def OpenUrl(self, url):
         webbrowser.open_new_tab(url)

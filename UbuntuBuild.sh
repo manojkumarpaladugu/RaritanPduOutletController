@@ -38,7 +38,7 @@ pyinstaller                            \
 # Copying dependencies
 mkdir $OUT_ASSETS_DIR
 cp $ASSETS_DIR/AppConfig.json        $OUT_ASSETS_DIR/AppConfig.json
-cp $ASSETS_DIR/PduOutletConfig.json  $BIN_DIR/PduOutletConfig.json
+cp $ASSETS_DIR/PduOutletConfig.json  $OUT_ASSETS_DIR/PduOutletConfig.json
 
 # cleaning up
 rm -rf $OUT_DIR/$CLI_APP_NAME
