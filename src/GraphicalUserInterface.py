@@ -45,7 +45,9 @@ class PduOutletController:
         self.applicationWidth  = appConfig['Application']['Width']
         self.applicationHeight = appConfig['Application']['Height']
         if os.name == 'nt': # Windows OS
-            self.applicationIcon = self.GetResourcePath(appConfig['Application']['Icon'])
+            relativePath         = appConfig['Application']['Icon'].split(';')[-1]
+            fileName             = appConfig['Application']['Icon'].split(';')[-2]
+            self.applicationIcon = self.GetResourcePath(os.path.join(relativePath, fileName))
         self.applicationTheme  = Theme(appConfig['Application']['Theme']['Static Frame'],
                                        appConfig['Application']['Theme']['Scrollable Frame'],
                                        appConfig['Application']['Theme']['PDU Frame'],
@@ -53,7 +55,10 @@ class PduOutletController:
                                        appConfig['Application']['Theme']['Group Frame'],
                                        appConfig['Application']['Theme']['Group Frame Text'],
                                        BUTTON_ACTIVE_COLOR)
-        self.pduConfigFile     = appConfig['Application']['PDU Configuration File']
+        relativePath           = appConfig['Application']['PDU Configuration'].split(';')[-1]
+        fileName               = appConfig['Application']['PDU Configuration'].split(';')[-2]
+        self.pduConfigFile     = os.path.join(relativePath, fileName)
+        self.gui               = customtkinter.CTk()
 
     def LoadConfiguration(self, fileName):
         with open(fileName, "r") as jsonFile:
@@ -63,7 +68,7 @@ class PduOutletController:
 
     def GetResourcePath(self, relativePath):
         """ Get absolute path to resource, works for dev and for PyInstaller """
-        basePath = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        basePath = getattr(sys, '_MEIPASS', '')
         return os.path.join(basePath, relativePath)
 
     def PopulatePduOutlets(self):
@@ -90,8 +95,12 @@ class PduOutletController:
                                                          outletController,
                                                          groupMap)
 
-    def GenerateUi(self):
-        self.gui = customtkinter.CTk()
+    def RunMainLoop(self):
+        self.PopulatePduOutlets()
+        self.GenerateWindow()
+        self.gui.mainloop()
+
+    def GenerateWindow(self):
         customtkinter.set_appearance_mode('light')     # system (default), dark, light
         customtkinter.set_default_color_theme('dark-blue')  # Themes: "blue" (standard), "green", "dark-blue"
         self.gui.title(self.applicationName)
@@ -209,11 +218,11 @@ class PduOutletController:
                     outlet.powerCycleButton.grid(row=groupRow, column=outletColumn, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
                     groupRow += 1
 
-        self.gui.bind('<Visibility>', self.RefreshButtonCallback())
-        self.gui.mainloop()
+        self.gui.after(500, lambda: self.RefreshButtonCallback())
 
-    def OpenPopUpWindow(self, title, message):
+    def OpenPopUpWindow(self, title, windowWidthHeight, message):
         popUpWindow = customtkinter.CTkToplevel(self.gui)
+        popUpWindow.geometry(windowWidthHeight)
         popUpWindow.title(title)
         # CtkTopLevel class set window icon after 200 ms. To overcome it, we should delay call to wm_iconbitmap(...).
         if os.name == 'nt': # Windows OS
@@ -222,10 +231,11 @@ class PduOutletController:
         label = customtkinter.CTkLabel(popUpWindow,
                                        text=message)
         label.pack(padx=20, pady=20)
-        x = self.gui.winfo_pointerx()
-        y = self.gui.winfo_pointery()
+        x = self.gui.winfo_x() + self.gui.winfo_width() // 2 - popUpWindow.winfo_width() // 2
+        y = self.gui.winfo_y() + self.gui.winfo_height() // 2 - popUpWindow.winfo_height() // 2
         popUpWindow.geometry("+%d+%d" %(x,y))
         popUpWindow.wm_transient(self.gui)   # Keep the toplevel window in front of the root window
+        popUpWindow.wait_visibility()
         popUpWindow.grab_set()
 
     def RefreshButtonCallback(self):
@@ -233,20 +243,20 @@ class PduOutletController:
         for pdu in self.pduMap.values():
             try:
                 outlets = pdu.outletController.ConnectToPdu()
+                for outletGroup in pdu.outletGroups.values():
+                    for outlet in outletGroup.values():
+                        outletNumber = outlet.number - 1
+                        if (pdu.outletController.IsOutletPowerOn(outlets[outletNumber])):
+                            outlet.powerStatusLabel.configure(text='ON', text_color='green')
+                        elif (pdu.outletController.IsOutletPowerOff(outlets[outletNumber])):
+                            outlet.powerStatusLabel.configure(text='OFF', text_color='red')
+                        else:
+                            outlet.powerStatusLabel.configure(text='-', text_color='black')
             except:
-                self.OpenPopUpWindow('Error',
-                                    'Unable to establish connection at https://{}'.format(pdu.ipAddress))
+                self.OpenPopUpWindow(title='Error',
+                                     windowWidthHeight='350x75',
+                                     message='Unable to establish connection at https://{}'.format(pdu.ipAddress))
                 continue
-            for outletGroup in pdu.outletGroups.values():
-                for outlet in outletGroup.values():
-                    outletNumber = outlet.number - 1
-                    if (pdu.outletController.IsOutletPowerOn(outlets[outletNumber])):
-                        outlet.powerStatusLabel.configure(text='ON', text_color='green')
-                    elif (pdu.outletController.IsOutletPowerOff(outlets[outletNumber])):
-                        outlet.powerStatusLabel.configure(text='OFF', text_color='red')
-                    else:
-                        outlet.powerStatusLabel.configure(text='-', text_color='black')
-        self.gui.unbind('<Visibility>')
 
     def OpenUrl(self, url):
         webbrowser.open_new_tab(url)
@@ -317,16 +327,18 @@ class PduOutletController:
         try:
             outlets = pdu.outletController.ConnectToPdu()
             if outlet.number > len(outlets):
-                self.OpenPopUpWindow('Error',
-                                     'Outlet number {0} is exceeding the maximum limit {1}'.format(outlet.number, len(outlets)))
+                self.OpenPopUpWindow(title='Error',
+                                     windowWidthHeight='400x75',
+                                     message='Outlet number {0} is exceeding the maximum limit {1}'.format(outlet.number, len(outlets)))
                 return
             outlet.powerOnButton.configure(state=customtkinter.DISABLED, fg_color='gray')
             pdu.outletController.PowerOnOutlet(outlets[outlet.number - 1])
             outlet.powerStatusLabel.configure(text='ON', text_color='green')
             outlet.powerOnButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
         except:
-            self.OpenPopUpWindow('Error',
-                                 'Unable to establish connection at https://{}'.format(pdu.ipAddress))
+            self.OpenPopUpWindow(title='Error',
+                                 windowWidthHeight='350x75',
+                                 message='Unable to establish connection at https://{}'.format(pdu.ipAddress))
 
     def PowerOnButtonCallback(self, pdu, outlet):
         thread = threading.Thread(target=self.PowerOnOutlet, args=[pdu, outlet])
@@ -336,16 +348,18 @@ class PduOutletController:
         try:
             outlets = pdu.outletController.ConnectToPdu()
             if outlet.number > len(outlets):
-                self.OpenPopUpWindow('Error',
-                                     'Outlet number {0} is exceeding the maximum limit {1}'.format(outlet.number, len(outlets)))
+                self.OpenPopUpWindow(title='Error',
+                                     windowWidthHeight='350x75',
+                                     message='Outlet number {0} is exceeding the maximum limit {1}'.format(outlet.number, len(outlets)))
                 return
             outlet.powerOffButton.configure(state=customtkinter.DISABLED, fg_color='gray')
             pdu.outletController.PowerOffOutlet(outlets[outlet.number - 1])
             outlet.powerStatusLabel.configure(text='OFF', text_color='red')
             outlet.powerOffButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
         except:
-            self.OpenPopUpWindow('Error',
-                                 'Unable to establish connection at https://{}'.format(pdu.ipAddress))
+            self.OpenPopUpWindow(title='Error',
+                                 windowWidthHeight='350x75',
+                                 message='Unable to establish connection at https://{}'.format(pdu.ipAddress))
 
     def PowerOffButtonCallback(self, pdu, outlet):
         thread = threading.Thread(target=self.PowerOffOutlet, args=[pdu, outlet])
@@ -355,8 +369,9 @@ class PduOutletController:
         try:
             outlets = pdu.outletController.ConnectToPdu()
             if outlet.number > len(outlets):
-                self.OpenPopUpWindow('Error',
-                                     'Outlet number {0} is exceeding the maximum limit {1}'.format(outlet.number, len(outlets)))
+                self.OpenPopUpWindow(title='Error',
+                                     windowWidthHeight='350x75',
+                                     message='Outlet number {0} is exceeding the maximum limit {1}'.format(outlet.number, len(outlets)))
                 return
             outlet.powerStatusLabel.configure(text='OFF', text_color='red')
             outlet.powerCycleButton.configure(state=customtkinter.DISABLED, fg_color='gray')
@@ -364,14 +379,14 @@ class PduOutletController:
             outlet.powerStatusLabel.configure(text='ON', text_color='green')
             outlet.powerCycleButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
         except:
-            self.OpenPopUpWindow('Error',
-                                 'Unable to establish connection at https://{}'.format(pdu.ipAddress))
+            self.OpenPopUpWindow(title='Error',
+                                 windowWidthHeight='350x75',
+                                 message='Unable to establish connection at https://{}'.format(pdu.ipAddress))
 
     def PowerCycleButtonCallback(self, pdu, outlet):
         thread = threading.Thread(target=self.PowerCycleOutlet, args=[pdu, outlet])
         thread.start()
 
 if __name__ == '__main__':
-    gui = PduOutletController()
-    gui.PopulatePduOutlets()
-    gui.GenerateUi()
+    pduOutletController = PduOutletController()
+    pduOutletController.RunMainLoop()

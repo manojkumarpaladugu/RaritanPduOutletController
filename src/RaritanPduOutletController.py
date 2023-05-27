@@ -9,9 +9,9 @@ class RaritanPduOutletController:
         self.pduPassword  = pduPassword
 
     def ConnectToPdu(self):
-        agent = rpc.Agent('https', self.pduIpAddress, self.pduUsername, self.pduPassword)
+        agent    = rpc.Agent('https', self.pduIpAddress, self.pduUsername, self.pduPassword)
         pduModel = pdumodel.Pdu(self.pduModel, agent)
-        outlets = pduModel.getOutlets()
+        outlets  = pduModel.getOutlets()
         return outlets
 
     def IsOutletPowerOn(self, outlet):

@@ -2,7 +2,7 @@
     "Application" : {
         "Width"  : 540,
         "Height" : 500,
-        "Icon"   : "assets\\PlugSocket.ico",
+        "Icon"   : "PlugSocket.ico;assets",
         "Theme"  : {
             "Static Frame"     : "white",
             "Scrollable Frame" : "white",
@@ -11,6 +11,6 @@
             "Group Frame"      : "#eceeee",
             "Group Frame Text" : "black"
         },
-        "PDU Configuration File" : "assets\\PduOutletConfig.json"
+        "PDU Configuration" : "PduOutletConfig.json;assets"
     }
 }
