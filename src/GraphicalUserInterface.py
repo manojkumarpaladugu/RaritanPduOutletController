@@ -219,7 +219,8 @@ class PduOutletController:
                     outlet.powerCycleButton.grid(row=groupRow, column=outletColumn, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
                     groupRow += 1
 
-        self.gui.after(1000, lambda: self.RefreshButtonCallback())
+        thread = threading.Thread(target=self.RefreshButtonCallback)
+        thread.start()
 
     def OpenPopUpWindow(self, title, windowWidthHeight, message):
         popUpWindow = customtkinter.CTkToplevel(self.gui)
