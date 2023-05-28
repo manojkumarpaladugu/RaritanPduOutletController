@@ -97,10 +97,11 @@ class PduOutletController:
 
     def RunMainLoop(self):
         self.PopulatePduOutlets()
-        self.GenerateWindow()
+        self.gui.bind('<Visibility>', self.GenerateWindow())
         self.gui.mainloop()
 
     def GenerateWindow(self):
+        self.gui.unbind('<Visibility>')
         customtkinter.set_appearance_mode('light')     # system (default), dark, light
         customtkinter.set_default_color_theme('dark-blue')  # Themes: "blue" (standard), "green", "dark-blue"
         self.gui.title(self.applicationName)
@@ -188,7 +189,7 @@ class PduOutletController:
                     outletColumn += 1
                     # Outlet status
                     outlet.powerStatusLabel = customtkinter.CTkLabel(groupFrame,
-                                                                     text='-',
+                                                                     text='?',
                                                                      text_color=self.applicationTheme.groupFrameText,
                                                                      width=25)
                     outlet.powerStatusLabel.grid(row=groupRow, column=outletColumn, padx=20, pady=5, sticky=customtkinter.W+customtkinter.E)
@@ -218,7 +219,7 @@ class PduOutletController:
                     outlet.powerCycleButton.grid(row=groupRow, column=outletColumn, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
                     groupRow += 1
 
-        self.gui.after(500, lambda: self.RefreshButtonCallback())
+        self.gui.after(1000, lambda: self.RefreshButtonCallback())
 
     def OpenPopUpWindow(self, title, windowWidthHeight, message):
         popUpWindow = customtkinter.CTkToplevel(self.gui)
@@ -251,7 +252,7 @@ class PduOutletController:
                         elif (pdu.outletController.IsOutletPowerOff(outlets[outletNumber])):
                             outlet.powerStatusLabel.configure(text='OFF', text_color='red')
                         else:
-                            outlet.powerStatusLabel.configure(text='-', text_color='black')
+                            outlet.powerStatusLabel.configure(text='?', text_color='black')
             except:
                 self.OpenPopUpWindow(title='Error',
                                      windowWidthHeight='350x75',
@@ -336,6 +337,7 @@ class PduOutletController:
             outlet.powerStatusLabel.configure(text='ON', text_color='green')
             outlet.powerOnButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
         except:
+            outlet.powerStatusLabel.configure(text='?', text_color='black')
             self.OpenPopUpWindow(title='Error',
                                  windowWidthHeight='350x75',
                                  message='Unable to establish connection at https://{}'.format(pdu.ipAddress))
@@ -357,6 +359,7 @@ class PduOutletController:
             outlet.powerStatusLabel.configure(text='OFF', text_color='red')
             outlet.powerOffButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
         except:
+            outlet.powerStatusLabel.configure(text='?', text_color='black')
             self.OpenPopUpWindow(title='Error',
                                  windowWidthHeight='350x75',
                                  message='Unable to establish connection at https://{}'.format(pdu.ipAddress))
@@ -379,6 +382,7 @@ class PduOutletController:
             outlet.powerStatusLabel.configure(text='ON', text_color='green')
             outlet.powerCycleButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
         except:
+            outlet.powerStatusLabel.configure(text='?', text_color='black')
             self.OpenPopUpWindow(title='Error',
                                  windowWidthHeight='350x75',
                                  message='Unable to establish connection at https://{}'.format(pdu.ipAddress))
