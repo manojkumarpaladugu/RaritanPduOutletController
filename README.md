@@ -13,6 +13,9 @@
     pip3 install customtkinter
     pip3 install pyinstaller
 
+### On Windows:
+pip3 install tk
+
 ### On Ubuntu:
 sudo apt-get install python3-tk
 
