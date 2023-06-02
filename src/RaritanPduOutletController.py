@@ -39,5 +39,5 @@ class RaritanPduOutletController:
         if(outlet.getState().cycleInProgress):
             return
         outlet.cyclePowerState()
-        while(outlet.getState().powerState == pdumodel.Outlet.PowerState.PS_OFF):
+        while(outlet.getState().cycleInProgress):
             pass
