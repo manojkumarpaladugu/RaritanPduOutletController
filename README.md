@@ -14,7 +14,7 @@
 ## Command Line Interface (CLI)
 <img src="https://github.com/manojkumarpaladugu/RaritanPduOutletController/blob/main/assets/RaritanPduOutletController_Cli.jpg" width="600"/>
 
-## Install Below Dependencies: 
+## Install Below Dependencies
 **On Windows and Ubuntu:**
 ~~~
 pip3 install raritan
@@ -31,7 +31,7 @@ pip3 install tk
 sudo apt-get install python3-tk
 ~~~
 
-## Generate Executable:
+## Generate Executable
 **On Windows:**
 ~~~
 .\BuildWindows.ps1

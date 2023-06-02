@@ -6,10 +6,10 @@ from   RaritanPduOutletController import RaritanPduOutletController
 if __name__ == '__main__':
     argParser = argparse.ArgumentParser()
     argParser.add_argument('-v' , action='version', version="%(prog)s ("+__version__+")")
-    argParser.add_argument('-i' , help='PDU IP Address'                           , required=True)
-    argParser.add_argument('-u' , help='PDU Username'                             , required=True)
-    argParser.add_argument('-p' , help='PDU Password'                             , required=True)
-    argParser.add_argument('-o' , help='PDU Outlet number'                        , required=True)
+    argParser.add_argument('-i' , help='PDU IP address'                           , required=True)
+    argParser.add_argument('-u' , help='PDU username'                             , required=True)
+    argParser.add_argument('-p' , help='PDU password'                             , required=True)
+    argParser.add_argument('-o' , help='PDU outlet number'                        , required=True)
     argParser.add_argument('-s' , help='Set PDU outlet power state (on|off|cycle)', required=True)
     args = argParser.parse_args()
 
