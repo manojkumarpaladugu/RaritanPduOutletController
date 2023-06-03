@@ -1,29 +1,43 @@
+import os
 import sys
+import textwrap
 import argparse
 from   version                    import __version__
 from   RaritanPduOutletController import RaritanPduOutletController
 
+# Environment variables
+PDU_HOST     = 'PDU_IP'
+PDU_USERNAME = 'PDU_USERNAME'
+PDU_PASSWORD = 'PDU_PASSWORD'
+
 if __name__ == '__main__':
-    argParser = argparse.ArgumentParser()
-    argParser.add_argument('-v' , action='version', version="%(prog)s ("+__version__+")")
-    argParser.add_argument('-i' , help='PDU IP address'                           , required=True)
-    argParser.add_argument('-u' , help='PDU username'                             , required=True)
-    argParser.add_argument('-p' , help='PDU password'                             , required=True)
+    additionalInfo = textwrap.dedent('''\
+        Additional Information:
+            The following environment variables will override the connection:
+                {0}
+                {1}
+                {2}'''.format(PDU_HOST, PDU_USERNAME, PDU_PASSWORD))
+    argParser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, epilog=additionalInfo)
+    argParser.add_argument('-v' , action='version'                                , version="%(prog)s ("+__version__+")")
+    argParser.add_argument('-i' , help='PDU IP address'                           , default='None')
+    argParser.add_argument('-u' , help='PDU username'                             , default='None')
+    argParser.add_argument('-p' , help='PDU password'                             , default='None')
     argParser.add_argument('-o' , help='PDU outlet number'                        , required=True)
     argParser.add_argument('-s' , help='Set PDU outlet power state (on|off|cycle)', required=True)
     args = argParser.parse_args()
 
-    pduIpAddress     = args.i
-    pduUsername      = args.u
-    pduPassword      = args.p
+    pduIpAddress     = os.environ.get(PDU_HOST    , args.i)
+    pduUsername      = os.environ.get(PDU_USERNAME, args.u)
+    pduPassword      = os.environ.get(PDU_PASSWORD, args.p)
+    outletController = RaritanPduOutletController('/model/pdu/0', pduIpAddress, pduUsername, pduPassword)
     pduOutletNumber  = int(args.o)
     pduState         = args.s
-    outletController = RaritanPduOutletController('/model/pdu/0', pduIpAddress, pduUsername, pduPassword)
 
     try:
         outlets = outletController.ConnectToPdu()
         if pduOutletNumber > len(outlets):
-            raise ValueError('ERROR: Outlet number {0} is exceeding the maximum limit {1}'.format(pduOutletNumber, len(outlets)))
+            raise ValueError('ERROR: Outlet number {0} is exceeding the maximum limit {1}'.format(pduOutletNumber,
+                                                                                                  len(outlets)))
 
         outlet = outlets[pduOutletNumber- 1]
         if pduState == 'on':
@@ -40,6 +54,8 @@ if __name__ == '__main__':
     except ValueError as message:
         print(message)
     except:
-        print('ERROR: Unable to establish connection at https://{}'.format(pduIpAddress))
+        print('ERROR: Unable to establish connection [IP={0}, Username={1}, Password={2}]'.format(pduIpAddress,
+                                                                                                  pduUsername,
+                                                                                                  pduPassword))
 
     sys.exit()

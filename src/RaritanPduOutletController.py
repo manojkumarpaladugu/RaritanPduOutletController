@@ -8,6 +8,9 @@ class RaritanPduOutletController:
         self.pduUsername  = pduUsername
         self.pduPassword  = pduPassword
 
+    def GetConnectionInfo(self):
+        return self.pduIpAddress, self.pduUsername, self.pduPassword
+
     def ConnectToPdu(self):
         agent    = rpc.Agent('https', self.pduIpAddress, self.pduUsername, self.pduPassword)
         pduModel = pdumodel.Pdu(self.pduModel, agent)

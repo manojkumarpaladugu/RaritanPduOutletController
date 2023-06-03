@@ -34,7 +34,6 @@ class Outlet:
 @dataclass
 class PowerDistributionUnit:
     name             : str
-    ipAddress        : str
     outletController : RaritanPduOutletController
     outletGroups     : dict
 
@@ -91,7 +90,6 @@ class PduOutletController:
                                                               pduMap['Username'],
                                                               pduMap['Password'])
             self.pduMap[pduName] = PowerDistributionUnit(pduName,
-                                                         pduMap['IP Address'],
                                                          outletController,
                                                          groupMap)
 
@@ -151,8 +149,9 @@ class PduOutletController:
             scrollbarRow += 1
 
             pduRow = 0
+            ipAddress, username, password = pduMap.outletController.GetConnectionInfo()
             pduLabel = customtkinter.CTkLabel(pduFrame,
-                                              text=pduName + ' - ' + pduMap.ipAddress,
+                                              text=pduName + ' - ' + ipAddress,
                                               text_color=self.applicationTheme.pduFrameText,
                                               font=customtkinter.CTkFont(weight='bold'))
             pduLabel.grid(row=pduRow, column=0, padx=5, pady=5, sticky=customtkinter.W)
@@ -195,7 +194,7 @@ class PduOutletController:
                     outlet.powerStatusLabel.grid(row=groupRow, column=outletColumn, padx=20, pady=5, sticky=customtkinter.W+customtkinter.E)
                     outletColumn += 1
                     # Power on button
-                    callbackWithArgs = functools.partial(self.PowerOnOutlet, pduMap, outlet)
+                    callbackWithArgs = functools.partial(self.PowerOnButtonCallback, pduMap, outlet)
                     outlet.powerOnButton = customtkinter.CTkButton(groupFrame,
                                                                   text="On",
                                                                   width=50,
@@ -203,7 +202,7 @@ class PduOutletController:
                     outlet.powerOnButton.grid(row=groupRow, column=outletColumn, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
                     outletColumn += 1
                     # Power off button
-                    callbackWithArgs = functools.partial(self.PowerOffOutlet, pduMap, outlet)
+                    callbackWithArgs = functools.partial(self.PowerOffButtonCallback, pduMap, outlet)
                     outlet.powerOffButton = customtkinter.CTkButton(groupFrame,
                                                                    text="Off",
                                                                    width=50,
@@ -255,9 +254,12 @@ class PduOutletController:
                         else:
                             outlet.powerStatusLabel.configure(text='?', text_color='black')
             except:
+                ipAddress, username, password = pdu.outletController.GetConnectionInfo()
                 self.OpenPopUpWindow(title='Error',
-                                     windowWidthHeight='350x75',
-                                     message='Unable to establish connection at https://{}'.format(pdu.ipAddress))
+                                     windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                     message='Unable to establish connection [IP={0}, Username={1}, Password={2}]'.format(ipAddress,
+                                                                                                                          username,
+                                                                                                                          password))
                 continue
 
     def OpenUrl(self, url):
@@ -326,6 +328,7 @@ class PduOutletController:
         aboutWindow.grab_set()
 
     def PowerOnOutlet(self, pdu, outlet):
+        outlet.powerOnButton.configure(state=customtkinter.DISABLED, fg_color='gray')
         try:
             outlets = pdu.outletController.ConnectToPdu()
             if outlet.number > len(outlets):
@@ -333,21 +336,24 @@ class PduOutletController:
                                      windowWidthHeight='400x75',
                                      message='Outlet number {0} is exceeding the maximum limit {1}'.format(outlet.number, len(outlets)))
                 return
-            outlet.powerOnButton.configure(state=customtkinter.DISABLED, fg_color='gray')
             pdu.outletController.PowerOnOutlet(outlets[outlet.number - 1])
             outlet.powerStatusLabel.configure(text='ON', text_color='green')
-            outlet.powerOnButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
         except:
             outlet.powerStatusLabel.configure(text='?', text_color='black')
+            ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
-                                 windowWidthHeight='350x75',
-                                 message='Unable to establish connection at https://{}'.format(pdu.ipAddress))
+                                    windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                    message='Unable to establish connection [IP={0}, Username={1}, Password={2}]'.format(ipAddress,
+                                                                                                                         username,
+                                                                                                                         password))
+        outlet.powerOnButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
 
     def PowerOnButtonCallback(self, pdu, outlet):
         thread = threading.Thread(target=self.PowerOnOutlet, args=[pdu, outlet])
         thread.start()
 
     def PowerOffOutlet(self, pdu, outlet):
+        outlet.powerOffButton.configure(state=customtkinter.DISABLED, fg_color='gray')
         try:
             outlets = pdu.outletController.ConnectToPdu()
             if outlet.number > len(outlets):
@@ -355,21 +361,24 @@ class PduOutletController:
                                      windowWidthHeight='350x75',
                                      message='Outlet number {0} is exceeding the maximum limit {1}'.format(outlet.number, len(outlets)))
                 return
-            outlet.powerOffButton.configure(state=customtkinter.DISABLED, fg_color='gray')
             pdu.outletController.PowerOffOutlet(outlets[outlet.number - 1])
             outlet.powerStatusLabel.configure(text='OFF', text_color='red')
-            outlet.powerOffButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
         except:
             outlet.powerStatusLabel.configure(text='?', text_color='black')
+            ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
-                                 windowWidthHeight='350x75',
-                                 message='Unable to establish connection at https://{}'.format(pdu.ipAddress))
+                                    windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                    message='Unable to establish connection [IP={0}, Username={1}, Password={2}]'.format(ipAddress,
+                                                                                                                         username,
+                                                                                                                         password))
+        outlet.powerOffButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
 
     def PowerOffButtonCallback(self, pdu, outlet):
         thread = threading.Thread(target=self.PowerOffOutlet, args=[pdu, outlet])
         thread.start()
 
     def PowerCycleOutlet(self, pdu, outlet):
+        outlet.powerCycleButton.configure(state=customtkinter.DISABLED, fg_color='gray')
         try:
             outlets = pdu.outletController.ConnectToPdu()
             if outlet.number > len(outlets):
@@ -378,15 +387,17 @@ class PduOutletController:
                                      message='Outlet number {0} is exceeding the maximum limit {1}'.format(outlet.number, len(outlets)))
                 return
             outlet.powerStatusLabel.configure(text='OFF', text_color='red')
-            outlet.powerCycleButton.configure(state=customtkinter.DISABLED, fg_color='gray')
             pdu.outletController.PowerCycleOutlet(outlets[outlet.number - 1])
             outlet.powerStatusLabel.configure(text='ON', text_color='green')
-            outlet.powerCycleButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
         except:
             outlet.powerStatusLabel.configure(text='?', text_color='black')
+            ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
-                                 windowWidthHeight='350x75',
-                                 message='Unable to establish connection at https://{}'.format(pdu.ipAddress))
+                                    windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                    message='Unable to establish connection [IP={0}, Username={1}, Password={2}]'.format(ipAddress,
+                                                                                                                         username,
+                                                                                                                         password))
+        outlet.powerCycleButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
 
     def PowerCycleButtonCallback(self, pdu, outlet):
         thread = threading.Thread(target=self.PowerCycleOutlet, args=[pdu, outlet])
