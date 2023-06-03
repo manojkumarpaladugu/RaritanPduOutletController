@@ -55,3 +55,10 @@ _out\RaritanPduOutletController_Ubuntu\RaritanPduOutletController_Cli
 <img src="https://github.com/manojkumarpaladugu/RaritanPduOutletController/blob/main/assets/RaritanPduOutletController_Cli.jpg" width="600"/>
 
 ## Release Notes
+> ## v1.0.1 (Apr/29/2023)
+> 
+> - Enhancements and bug fixes
+
+> ## v1.0.0 (Apr/29/2023)
+> 
+> - Added GUI tool
