@@ -1,6 +1,10 @@
 from raritan     import rpc
 from raritan.rpc import pdumodel
 
+class RaritanPduException(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
 class RaritanPduOutletController:
     def __init__(self, pduModel, pduIpAddress, pduUsername, pduPassword):
         self.pduModel     = pduModel
@@ -12,10 +16,16 @@ class RaritanPduOutletController:
         return self.pduIpAddress, self.pduUsername, self.pduPassword
 
     def ConnectToPdu(self):
-        agent    = rpc.Agent('https', self.pduIpAddress, self.pduUsername, self.pduPassword)
-        pduModel = pdumodel.Pdu(self.pduModel, agent)
-        outlets  = pduModel.getOutlets()
-        return outlets
+        try:
+            agent    = rpc.Agent('https', self.pduIpAddress, self.pduUsername, self.pduPassword)
+            pduModel = pdumodel.Pdu(self.pduModel, agent)
+            outlets  = pduModel.getOutlets()
+            return outlets
+        except rpc.HttpException as httpExec:
+            if 'Authentication failed' in httpExec.args[0]:
+                raise RaritanPduException('Authentication error')
+            else:
+                raise RaritanPduException('Unable to establish connection')
 
     def IsOutletPowerOn(self, outlet):
         return outlet.getState().powerState == pdumodel.Outlet.PowerState.PS_ON
