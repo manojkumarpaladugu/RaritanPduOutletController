@@ -1,14 +1,15 @@
 import os
-import sys
+import MiscLib
 import textwrap
 import argparse
 from   version                    import __version__
 from   RaritanPduOutletController import RaritanPduOutletController
 
 # Environment variables
-PDU_HOST     = 'PDU_IP'
-PDU_USERNAME = 'PDU_USERNAME'
-PDU_PASSWORD = 'PDU_PASSWORD'
+PDU_HOST        = 'PDU_IP'
+PDU_USERNAME    = 'PDU_USERNAME'
+PDU_PASSWORD    = 'PDU_PASSWORD'
+TIMEOUT_SECONDS = 5
 
 if __name__ == '__main__':
     additionalInfo = textwrap.dedent('''\
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     pduState         = args.s
 
     try:
-        outlets = outletController.ConnectToPdu()
+        outlets = MiscLib.RunThreadWithReturnValueBlocking(function=outletController.ConnectToPdu, timeout=TIMEOUT_SECONDS)
         if pduOutletNumber > len(outlets):
             raise ValueError('ERROR: Outlet number {0} is exceeding the maximum limit {1}'.format(pduOutletNumber,
                                                                                                   len(outlets)))
@@ -53,9 +54,12 @@ if __name__ == '__main__':
             raise ValueError('ERROR: Unrecognised option \'-s {}\''.format(pduState))
     except ValueError as message:
         print(message)
+    except MiscLib.TimeoutException as message:
+        print('ERROR: {0} [IP={1}, Username={2}, Password={3}]'.format(message,
+                                                                       pduIpAddress,
+                                                                       pduUsername,
+                                                                       pduPassword))
     except:
         print('ERROR: Unable to establish connection [IP={0}, Username={1}, Password={2}]'.format(pduIpAddress,
                                                                                                   pduUsername,
                                                                                                   pduPassword))
-
-    sys.exit()
