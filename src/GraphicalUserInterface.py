@@ -120,14 +120,16 @@ class PduOutletController:
                                                      text='Refresh',
                                                      width=self.applicationWidth / 2,
                                                      height=20,
-                                                     command=self.RefreshButtonCallback)
+                                                     command=self.RefreshButtonCallback,
+                                                     cursor='hand2')
         self.refreshButton.grid(row=0, column=0, padx=5, sticky=customtkinter.W+customtkinter.E)
 
         self.aboutButton = customtkinter.CTkButton(staticFrame,
                                                    text='About',
                                                    width=self.applicationWidth / 2,
                                                    height=20,
-                                                   command=self.AboutButtonCallback)
+                                                   command=self.AboutButtonCallback,
+                                                   cursor='hand2')
         self.aboutButton.grid(row=0, column=1, padx=5, sticky=customtkinter.W+customtkinter.E)
 
         verticalScrollableFrame = customtkinter.CTkScrollableFrame(self.gui,
@@ -200,7 +202,8 @@ class PduOutletController:
                     outlet.powerOnButton = customtkinter.CTkButton(groupFrame,
                                                                   text="On",
                                                                   width=50,
-                                                                  command=callbackWithArgs)
+                                                                  command=callbackWithArgs,
+                                                                  cursor='hand2')
                     outlet.powerOnButton.grid(row=groupRow, column=outletColumn, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
                     outletColumn += 1
                     # Power off button
@@ -208,7 +211,8 @@ class PduOutletController:
                     outlet.powerOffButton = customtkinter.CTkButton(groupFrame,
                                                                    text="Off",
                                                                    width=50,
-                                                                   command=callbackWithArgs)
+                                                                   command=callbackWithArgs,
+                                                                   cursor='hand2')
                     outlet.powerOffButton.grid(row=groupRow, column=outletColumn, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
                     outletColumn += 1
                     # Power cycle button
@@ -216,7 +220,8 @@ class PduOutletController:
                     outlet.powerCycleButton = customtkinter.CTkButton(groupFrame,
                                                                      text="Cycle",
                                                                      width=50,
-                                                                     command=callbackWithArgs)
+                                                                     command=callbackWithArgs,
+                                                                     cursor='hand2')
                     outlet.powerCycleButton.grid(row=groupRow, column=outletColumn, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
                     groupRow += 1
 
