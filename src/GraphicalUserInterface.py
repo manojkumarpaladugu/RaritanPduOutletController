@@ -1,16 +1,18 @@
 import os
 import sys
 import json
+import MiscLib
 import threading
 import functools
 import webbrowser
 import customtkinter
 from   version                    import __version__
 from   dataclasses                import dataclass
-from   RaritanPduOutletController import RaritanPduOutletController
+from   RaritanPduOutletController import *
 
 BUTTON_ACTIVE_COLOR    = '#3a7ebf'
 APP_CONFIGURATION_FILE = os.path.join('assets', 'AppConfig.json')
+TIMEOUT_SECONDS        = 5
 
 @dataclass
 class Theme:
@@ -236,14 +238,13 @@ class PduOutletController:
         y = self.gui.winfo_y() + self.gui.winfo_height() // 2 - popUpWindow.winfo_height() // 2
         popUpWindow.geometry("+%d+%d" %(x,y))
         popUpWindow.wm_transient(self.gui)   # Keep the toplevel window in front of the root window
-        popUpWindow.wait_visibility()
         popUpWindow.grab_set()
 
     def RefreshButtonCallback(self):
         # Update outlet power status
         for pdu in self.pduMap.values():
             try:
-                outlets = pdu.outletController.ConnectToPdu()
+                outlets = MiscLib.RunThreadWithReturnValueBlocking(function=pdu.outletController.ConnectToPdu, timeout=TIMEOUT_SECONDS)
                 for outletGroup in pdu.outletGroups.values():
                     for outlet in outletGroup.values():
                         outletNumber = outlet.number - 1
@@ -253,13 +254,15 @@ class PduOutletController:
                             outlet.powerStatusLabel.configure(text='OFF', text_color='red')
                         else:
                             outlet.powerStatusLabel.configure(text='?', text_color='black')
-            except:
+            except (MiscLib.TimeoutException, RaritanPduException) as message:
                 ipAddress, username, password = pdu.outletController.GetConnectionInfo()
                 self.OpenPopUpWindow(title='Error',
-                                     windowWidthHeight='{}x75'.format(self.applicationWidth),
-                                     message='Unable to establish connection [IP={0}, Username={1}, Password={2}]'.format(ipAddress,
-                                                                                                                          username,
-                                                                                                                          password))
+                                    windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                    message='{0}\nIP={1}, Username={2}, Password={3}'.format(message, ipAddress, username, password))
+            except:
+                self.OpenPopUpWindow(title='Error',
+                                    windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                    message='Unknown exception occurred')
                 continue
 
     def OpenUrl(self, url):
@@ -330,7 +333,7 @@ class PduOutletController:
     def PowerOnOutlet(self, pdu, outlet):
         outlet.powerOnButton.configure(state=customtkinter.DISABLED, fg_color='gray')
         try:
-            outlets = pdu.outletController.ConnectToPdu()
+            outlets = MiscLib.RunThreadWithReturnValueBlocking(function=pdu.outletController.ConnectToPdu, timeout=TIMEOUT_SECONDS)
             if outlet.number > len(outlets):
                 self.OpenPopUpWindow(title='Error',
                                      windowWidthHeight='400x75',
@@ -338,14 +341,17 @@ class PduOutletController:
                 return
             pdu.outletController.PowerOnOutlet(outlets[outlet.number - 1])
             outlet.powerStatusLabel.configure(text='ON', text_color='green')
-        except:
+        except (MiscLib.TimeoutException, RaritanPduException) as message:
             outlet.powerStatusLabel.configure(text='?', text_color='black')
             ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
-                                    windowWidthHeight='{}x75'.format(self.applicationWidth),
-                                    message='Unable to establish connection [IP={0}, Username={1}, Password={2}]'.format(ipAddress,
-                                                                                                                         username,
-                                                                                                                         password))
+                                 windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                 message='{0}\nIP={1}, Username={2}, Password={3}'.format(message, ipAddress, username, password))
+        except:
+            outlet.powerStatusLabel.configure(text='?', text_color='black')
+            self.OpenPopUpWindow(title='Error',
+                                 windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                 message='Unknown exception occurred')
         outlet.powerOnButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
 
     def PowerOnButtonCallback(self, pdu, outlet):
@@ -355,7 +361,7 @@ class PduOutletController:
     def PowerOffOutlet(self, pdu, outlet):
         outlet.powerOffButton.configure(state=customtkinter.DISABLED, fg_color='gray')
         try:
-            outlets = pdu.outletController.ConnectToPdu()
+            outlets = MiscLib.RunThreadWithReturnValueBlocking(function=pdu.outletController.ConnectToPdu, timeout=TIMEOUT_SECONDS)
             if outlet.number > len(outlets):
                 self.OpenPopUpWindow(title='Error',
                                      windowWidthHeight='350x75',
@@ -363,14 +369,17 @@ class PduOutletController:
                 return
             pdu.outletController.PowerOffOutlet(outlets[outlet.number - 1])
             outlet.powerStatusLabel.configure(text='OFF', text_color='red')
-        except:
+        except (MiscLib.TimeoutException, RaritanPduException) as message:
             outlet.powerStatusLabel.configure(text='?', text_color='black')
             ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
-                                    windowWidthHeight='{}x75'.format(self.applicationWidth),
-                                    message='Unable to establish connection [IP={0}, Username={1}, Password={2}]'.format(ipAddress,
-                                                                                                                         username,
-                                                                                                                         password))
+                                 windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                 message='{0}\nIP={1}, Username={2}, Password={3}'.format(message, ipAddress, username, password))
+        except:
+            outlet.powerStatusLabel.configure(text='?', text_color='black')
+            self.OpenPopUpWindow(title='Error',
+                                 windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                 message='Unknown exception occurred')
         outlet.powerOffButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
 
     def PowerOffButtonCallback(self, pdu, outlet):
@@ -380,7 +389,7 @@ class PduOutletController:
     def PowerCycleOutlet(self, pdu, outlet):
         outlet.powerCycleButton.configure(state=customtkinter.DISABLED, fg_color='gray')
         try:
-            outlets = pdu.outletController.ConnectToPdu()
+            outlets = MiscLib.RunThreadWithReturnValueBlocking(function=pdu.outletController.ConnectToPdu, timeout=TIMEOUT_SECONDS)
             if outlet.number > len(outlets):
                 self.OpenPopUpWindow(title='Error',
                                      windowWidthHeight='350x75',
@@ -389,14 +398,17 @@ class PduOutletController:
             outlet.powerStatusLabel.configure(text='OFF', text_color='red')
             pdu.outletController.PowerCycleOutlet(outlets[outlet.number - 1])
             outlet.powerStatusLabel.configure(text='ON', text_color='green')
-        except:
+        except (MiscLib.TimeoutException, RaritanPduException) as message:
             outlet.powerStatusLabel.configure(text='?', text_color='black')
             ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
-                                    windowWidthHeight='{}x75'.format(self.applicationWidth),
-                                    message='Unable to establish connection [IP={0}, Username={1}, Password={2}]'.format(ipAddress,
-                                                                                                                         username,
-                                                                                                                         password))
+                                 windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                 message='{0}\nIP={1}, Username={2}, Password={3}'.format(message, ipAddress, username, password))
+        except:
+            outlet.powerStatusLabel.configure(text='?', text_color='black')
+            self.OpenPopUpWindow(title='Error',
+                                 windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                 message='Unknown exception occurred')
         outlet.powerCycleButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
 
     def PowerCycleButtonCallback(self, pdu, outlet):

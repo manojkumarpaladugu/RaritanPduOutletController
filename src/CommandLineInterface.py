@@ -37,8 +37,7 @@ if __name__ == '__main__':
     try:
         outlets = MiscLib.RunThreadWithReturnValueBlocking(function=outletController.ConnectToPdu, timeout=TIMEOUT_SECONDS)
         if pduOutletNumber > len(outlets):
-            raise ValueError('Outlet number {0} is exceeding the maximum limit {1}'.format(pduOutletNumber,
-                                                                                           len(outlets)))
+            raise ValueError('Outlet number {0} is exceeding the maximum limit {1}'.format(pduOutletNumber, len(outlets)))
 
         outlet = outlets[pduOutletNumber- 1]
         if pduState == 'on':
@@ -54,15 +53,7 @@ if __name__ == '__main__':
             raise ValueError('Unrecognised option \'-s {}\''.format(pduState))
     except ValueError as message:
         print('ERROR:', message)
-    except MiscLib.TimeoutException as message:
-        print('ERROR: {0} [IP={1}, Username={2}, Password={3}]'.format(message,
-                                                                       pduIpAddress,
-                                                                       pduUsername,
-                                                                       pduPassword))
-    except RaritanPduException as message:
-        print('ERROR: {0} [IP={1}, Username={2}, Password={3}]'.format(message,
-                                                                       pduIpAddress,
-                                                                       pduUsername,
-                                                                       pduPassword))
+    except (MiscLib.TimeoutException, RaritanPduException) as message:
+        print('ERROR: {0} [IP={1}, Username={2}, Password={3}]'.format(message, pduIpAddress, pduUsername, pduPassword))
     except:
         print('ERROR: Unknown exception occurred')
