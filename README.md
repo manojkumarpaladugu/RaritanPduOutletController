@@ -8,19 +8,19 @@
 Released binaries and source code available in [Releases](https://github.com/manojkumarpaladugu/RaritanPduOutletController/releases) page
 
 ## Install Below Dependencies
-**On Windows and Ubuntu:**
+**On Windows:**
 ~~~
 pip3 install raritan
 pip3 install customtkinter
 pip3 install pyinstaller
-~~~
-**On Windows:**
-~~~
 pip3 install tk
 ~~~
 
 **On Ubuntu:**
 ~~~
+sudo pip3 install raritan
+sudo pip3 install customtkinter
+sudo pip3 install pyinstaller
 sudo apt-get install python3-tk
 ~~~
 
