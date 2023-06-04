@@ -23,24 +23,29 @@ class RaritanPduOutletController:
     def IsOutletPowerOff(self, outlet):
         return outlet.getState().powerState == pdumodel.Outlet.PowerState.PS_OFF
 
+    def IsSwitchOnInProgress(self, outlet):
+        return outlet.getState().switchOnInProgress
+
+    def IsCycleInProgress(self, outlet):
+        return outlet.getState().cycleInProgress
+
     def PowerOnOutlet(self, outlet):
-        if (outlet.getState().switchOnInProgress) or \
-           (outlet.getState().powerState == pdumodel.Outlet.PowerState.PS_ON):
+        if (self.IsSwitchOnInProgress(outlet) or self.IsOutletPowerOn(outlet)):
             return
         outlet.setPowerState(pdumodel.Outlet.PowerState.PS_ON)
-        while(outlet.getState().switchOnInProgress):
+        while(self.IsSwitchOnInProgress(outlet)):
             pass
 
     def PowerOffOutlet(self, outlet):
-        if (outlet.getState().powerState == pdumodel.Outlet.PowerState.PS_OFF):
+        if (self.IsOutletPowerOff(outlet)):
             return
         outlet.setPowerState(pdumodel.Outlet.PowerState.PS_OFF)
-        while(outlet.getState().powerState == pdumodel.Outlet.PowerState.PS_ON):
+        while(self.IsOutletPowerOn(outlet)):
             pass
 
     def PowerCycleOutlet(self, outlet):
-        if(outlet.getState().cycleInProgress):
+        if(self.IsCycleInProgress(outlet)):
             return
         outlet.cyclePowerState()
-        while(outlet.getState().cycleInProgress):
+        while(self.IsCycleInProgress(outlet)):
             pass
