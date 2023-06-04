@@ -55,6 +55,12 @@ _out\RaritanPduOutletController_Ubuntu\RaritanPduOutletController_Cli
 <img src="https://github.com/manojkumarpaladugu/RaritanPduOutletController/blob/main/assets/RaritanPduOutletController_Cli.jpg" width="600"/>
 
 ## Release Notes
+> ## v1.0.3 (June/04/2023)
+> 
+> - Added error handling in CLI and GUI
+> - Environment variable support in CLI
+> - Enhancements and bug fixes
+
 > ## v1.0.2 (June/03/2023)
 > 
 > - Added CLI support
@@ -65,5 +71,5 @@ _out\RaritanPduOutletController_Ubuntu\RaritanPduOutletController_Cli
 > - Enhancements and bug fixes
 
 > ## v1.0.0 (April/29/2023)
-> 
+> - Added Raritan PDU device
 > - Added GUI tool
