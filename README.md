@@ -13,6 +13,7 @@ Released binaries and source code available in [Releases](https://github.com/man
 pip3 install raritan
 pip3 install customtkinter
 pip3 install pyinstaller
+pip3 install Pillow
 pip3 install tk
 ~~~
 
@@ -21,6 +22,7 @@ pip3 install tk
 sudo pip3 install raritan
 sudo pip3 install customtkinter
 sudo pip3 install pyinstaller
+sudo pip3 install Pillow
 sudo apt-get install python3-tk
 ~~~
 

@@ -1,6 +1,6 @@
 {
     "Application" : {
-        "Width"  : 540,
+        "Width"  : 350,
         "Height" : 500,
         "Icon"   : "PlugSocket.ico;assets",
         "Theme"  : {

@@ -6,13 +6,17 @@ import threading
 import functools
 import webbrowser
 import customtkinter
+from   PIL                        import Image
 from   version                    import __version__
 from   dataclasses                import dataclass
 from   RaritanPduOutletController import *
 
 BUTTON_ACTIVE_COLOR    = '#3a7ebf'
 APP_CONFIGURATION_FILE = os.path.join('assets', 'AppConfig.json')
+POWER_CYCLE_BUTTON_IMG = os.path.join('assets', 'Cycle.png')
 TIMEOUT_SECONDS        = 5
+PWR_ON                 = "ON"
+PWR_OFF                = "OFF"
 
 @dataclass
 class Theme:
@@ -26,12 +30,12 @@ class Theme:
 
 @dataclass
 class Outlet:
-    name             : str
-    number           : int
-    powerStatusLabel : customtkinter.CTkLabel
-    powerOnButton    : customtkinter.CTkButton
-    powerOffButton   : customtkinter.CTkButton
-    powerCycleButton : customtkinter.CTkButton
+    name                 : str
+    number               : int
+    powerStatusLabel     : customtkinter.CTkLabel
+    powerSliderSwitchVar : customtkinter.StringVar
+    powerSliderSwitch    : customtkinter.CTkSwitch
+    powerCycleButton     : customtkinter.CTkButton
 
 @dataclass
 class PowerDistributionUnit:
@@ -109,6 +113,8 @@ class PduOutletController:
         if os.name == 'nt': # Windows OS
             self.gui.wm_iconbitmap(self.applicationIcon)
 
+        self.outletNameLabelWidth = 1
+
         staticFrame = customtkinter.CTkFrame(self.gui,
                                              width=self.applicationWidth,
                                              corner_radius=0,
@@ -166,67 +172,107 @@ class PduOutletController:
                 groupFrame = customtkinter.CTkFrame(pduFrame,
                                                     corner_radius=5,
                                                     fg_color=self.applicationTheme.groupFrame)
-                groupFrame.grid(row=pduRow, column=0, padx=5, pady=5, sticky=customtkinter.N+customtkinter.S)
+                groupFrame.grid(row=pduRow, column=0, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
                 pduRow += 1
 
                 groupRow = 0
                 outletGrouplabel = customtkinter.CTkLabel(groupFrame,
                                                           text=outletGroupName,
                                                           width=150,
+                                                          text_color='red',
+                                                          font=customtkinter.CTkFont(weight='bold'))
+                outletGrouplabel.grid(row=groupRow, column=0, padx=5, pady=5, columnspan=5, sticky=customtkinter.W+customtkinter.E)
+                groupRow += 1
+
+                outletHeaderLabel = customtkinter.CTkLabel(groupFrame,
+                                                           text='Outlet',
+                                                           text_color=self.applicationTheme.groupFrameText,
+                                                           font=customtkinter.CTkFont(weight='bold'))
+                outletHeaderLabel.grid(row=groupRow, column=0, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
+
+                nameHeaderLabel = customtkinter.CTkLabel(groupFrame,
+                                                         text='Name',
+                                                         text_color=self.applicationTheme.groupFrameText,
+                                                         font=customtkinter.CTkFont(weight='bold'))
+                nameHeaderLabel.grid(row=groupRow, column=1, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
+
+                statusHeaderLabel = customtkinter.CTkLabel(groupFrame,
+                                                           text='Status',
+                                                           text_color=self.applicationTheme.groupFrameText,
+                                                           font=customtkinter.CTkFont(weight='bold'))
+                statusHeaderLabel.grid(row=groupRow, column=2, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
+
+                offOnHeaderLabel = customtkinter.CTkLabel(groupFrame,
+                                                          text='Off .. On',
                                                           text_color=self.applicationTheme.groupFrameText,
                                                           font=customtkinter.CTkFont(weight='bold'))
-                outletGrouplabel.grid(row=groupRow, column=0, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
+                offOnHeaderLabel.grid(row=groupRow, column=3, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
+
+                cycleHeaderLabel = customtkinter.CTkLabel(groupFrame,
+                                                          text='Cycle',
+                                                          text_color=self.applicationTheme.groupFrameText,
+                                                          font=customtkinter.CTkFont(weight='bold'))
+                cycleHeaderLabel.grid(row=groupRow, column=4, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
+                groupRow += 1
+
                 for outlet in outletGroupMap.values():
-                    outletColumn = 1
+                    outletColumn = 0
                     # Outlet number
                     outletNumberLabel = customtkinter.CTkLabel(groupFrame,
                                                                text=str(outlet.number),
                                                                text_color=self.applicationTheme.groupFrameText)
-                    outletNumberLabel.grid(row=groupRow, column=outletColumn, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
+                    outletNumberLabel.grid(row=groupRow, column=outletColumn, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
                     outletColumn += 1
                     # Outlet name
                     outletNameLabel = customtkinter.CTkLabel(groupFrame,
                                                              text=outlet.name,
-                                                             text_color=self.applicationTheme.groupFrameText)
-                    outletNameLabel.grid(row=groupRow, column=outletColumn, padx=20, pady=5, sticky=customtkinter.W)
+                                                             text_color=self.applicationTheme.groupFrameText,
+                                                             width=self.outletNameLabelWidth)
+                    outletNameLabel.grid(row=groupRow, column=outletColumn, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
                     outletColumn += 1
                     # Outlet status
                     outlet.powerStatusLabel = customtkinter.CTkLabel(groupFrame,
                                                                      text='?',
                                                                      text_color=self.applicationTheme.groupFrameText,
                                                                      width=25)
-                    outlet.powerStatusLabel.grid(row=groupRow, column=outletColumn, padx=20, pady=5, sticky=customtkinter.W+customtkinter.E)
+                    outlet.powerStatusLabel.grid(row=groupRow, column=outletColumn, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
                     outletColumn += 1
-                    # Power on button
-                    callbackWithArgs = functools.partial(self.PowerOnButtonCallback, pduMap, outlet)
-                    outlet.powerOnButton = customtkinter.CTkButton(groupFrame,
-                                                                  text="On",
-                                                                  width=50,
-                                                                  command=callbackWithArgs,
-                                                                  cursor='hand2')
-                    outlet.powerOnButton.grid(row=groupRow, column=outletColumn, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
-                    outletColumn += 1
-                    # Power off button
-                    callbackWithArgs = functools.partial(self.PowerOffButtonCallback, pduMap, outlet)
-                    outlet.powerOffButton = customtkinter.CTkButton(groupFrame,
-                                                                   text="Off",
-                                                                   width=50,
-                                                                   command=callbackWithArgs,
-                                                                   cursor='hand2')
-                    outlet.powerOffButton.grid(row=groupRow, column=outletColumn, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
+                    # Power slider switch
+                    outlet.powerSliderSwitchVar = customtkinter.StringVar(value=PWR_OFF)
+                    callbackWithArgs = functools.partial(self.PowerSliderSwitchCallback, pduMap, outlet)
+                    outlet.powerSliderSwitch = customtkinter.CTkSwitch(master=groupFrame,
+                                                                       text='',
+                                                                       width=1,
+                                                                       command=callbackWithArgs,
+                                                                       progress_color='gray',
+                                                                       button_hover_color=self.applicationTheme.buttonActiveColor,
+                                                                       variable=outlet.powerSliderSwitchVar,
+                                                                       onvalue=PWR_ON,
+                                                                       offvalue=PWR_OFF,
+                                                                       cursor='hand2')
+                    outlet.powerSliderSwitch.grid(row=groupRow, column=outletColumn, padx=10, pady=5, sticky=customtkinter.E)
                     outletColumn += 1
                     # Power cycle button
+                    powerCycleButtonImgPath = self.GetResourcePath(POWER_CYCLE_BUTTON_IMG)
+                    powerCycleButtonImg = customtkinter.CTkImage(Image.open(powerCycleButtonImgPath), size=(27, 27))
                     callbackWithArgs = functools.partial(self.PowerCycleButtonCallback, pduMap, outlet)
                     outlet.powerCycleButton = customtkinter.CTkButton(groupFrame,
-                                                                     text="Cycle",
-                                                                     width=50,
-                                                                     command=callbackWithArgs,
-                                                                     cursor='hand2')
-                    outlet.powerCycleButton.grid(row=groupRow, column=outletColumn, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
+                                                                      text='',
+                                                                      height=35,
+                                                                      width=27,
+                                                                      image=powerCycleButtonImg,
+                                                                      fg_color='transparent',
+                                                                      hover_color='white',
+                                                                      command=callbackWithArgs,
+                                                                      cursor='hand2')
+                    outlet.powerCycleButton.grid(row=groupRow, column=outletColumn, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
                     groupRow += 1
 
-        thread = threading.Thread(target=self.RefreshButtonCallback)
-        thread.start()
+                    self.gui.update()
+                    if (outletNameLabel.winfo_width() - 15) > self.outletNameLabelWidth:
+                        self.outletNameLabelWidth = outletNameLabel.winfo_width() - 15
+
+        self.RefreshButtonCallback()
 
     def OpenPopUpWindow(self, title, windowWidthHeight, message):
         popUpWindow = customtkinter.CTkToplevel(self.gui)
@@ -254,11 +300,14 @@ class PduOutletController:
                     for outlet in outletGroup.values():
                         outletNumber = outlet.number - 1
                         if (pdu.outletController.IsOutletPowerOn(outlets[outletNumber])):
-                            outlet.powerStatusLabel.configure(text='ON', text_color='green')
+                            outlet.powerStatusLabel.configure(text=PWR_ON, text_color='green')
+                            outlet.powerSliderSwitch.configure(button_color='green')
                         elif (pdu.outletController.IsOutletPowerOff(outlets[outletNumber])):
-                            outlet.powerStatusLabel.configure(text='OFF', text_color='red')
+                            outlet.powerStatusLabel.configure(text=PWR_OFF, text_color='red')
+                            outlet.powerSliderSwitch.configure(button_color='red')
                         else:
                             outlet.powerStatusLabel.configure(text='?', text_color='black')
+                            outlet.powerSliderSwitch.configure(button_color='black')
             except (MiscLib.TimeoutException, RaritanPduException) as message:
                 ipAddress, username, password = pdu.outletController.GetConnectionInfo()
                 self.OpenPopUpWindow(title='Error',
@@ -336,7 +385,8 @@ class PduOutletController:
         aboutWindow.grab_set()
 
     def PowerOnOutlet(self, pdu, outlet):
-        outlet.powerOnButton.configure(state=customtkinter.DISABLED, fg_color='gray')
+        error = False
+        outlet.powerSliderSwitch.configure(state=customtkinter.DISABLED)
         try:
             outlets = MiscLib.RunThreadWithReturnValueBlocking(function=pdu.outletController.ConnectToPdu, timeout=TIMEOUT_SECONDS)
             if outlet.number > len(outlets):
@@ -345,26 +395,28 @@ class PduOutletController:
                                      message='Outlet number {0} is exceeding the maximum limit {1}'.format(outlet.number, len(outlets)))
                 return
             pdu.outletController.PowerOnOutlet(outlets[outlet.number - 1])
-            outlet.powerStatusLabel.configure(text='ON', text_color='green')
+            outlet.powerStatusLabel.configure(text=PWR_ON, text_color='green')
+            outlet.powerSliderSwitch.configure(button_color='green')
         except (MiscLib.TimeoutException, RaritanPduException) as message:
-            outlet.powerStatusLabel.configure(text='?', text_color='black')
+            error = True
             ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
                                  windowWidthHeight='{}x75'.format(self.applicationWidth),
                                  message='{0}\nIP={1}, Username={2}, Password={3}'.format(message, ipAddress, username, password))
         except:
-            outlet.powerStatusLabel.configure(text='?', text_color='black')
+            error = True
             self.OpenPopUpWindow(title='Error',
                                  windowWidthHeight='{}x75'.format(self.applicationWidth),
                                  message='Unknown exception occurred')
-        outlet.powerOnButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
 
-    def PowerOnButtonCallback(self, pdu, outlet):
-        thread = threading.Thread(target=self.PowerOnOutlet, args=[pdu, outlet])
-        thread.start()
+        outlet.powerSliderSwitch.configure(state=customtkinter.NORMAL)
+        if error:
+            outlet.powerStatusLabel.configure(text='?', text_color='black')
+            outlet.powerSliderSwitch.deselect()
 
     def PowerOffOutlet(self, pdu, outlet):
-        outlet.powerOffButton.configure(state=customtkinter.DISABLED, fg_color='gray')
+        error = False
+        outlet.powerSliderSwitch.configure(state=customtkinter.DISABLED)
         try:
             outlets = MiscLib.RunThreadWithReturnValueBlocking(function=pdu.outletController.ConnectToPdu, timeout=TIMEOUT_SECONDS)
             if outlet.number > len(outlets):
@@ -373,26 +425,36 @@ class PduOutletController:
                                      message='Outlet number {0} is exceeding the maximum limit {1}'.format(outlet.number, len(outlets)))
                 return
             pdu.outletController.PowerOffOutlet(outlets[outlet.number - 1])
-            outlet.powerStatusLabel.configure(text='OFF', text_color='red')
+            outlet.powerStatusLabel.configure(text=PWR_OFF, text_color='red')
+            outlet.powerSliderSwitch.configure(button_color='red')
         except (MiscLib.TimeoutException, RaritanPduException) as message:
-            outlet.powerStatusLabel.configure(text='?', text_color='black')
+            error = True
             ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
                                  windowWidthHeight='{}x75'.format(self.applicationWidth),
                                  message='{0}\nIP={1}, Username={2}, Password={3}'.format(message, ipAddress, username, password))
         except:
-            outlet.powerStatusLabel.configure(text='?', text_color='black')
+            error = True
             self.OpenPopUpWindow(title='Error',
                                  windowWidthHeight='{}x75'.format(self.applicationWidth),
                                  message='Unknown exception occurred')
-        outlet.powerOffButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
 
-    def PowerOffButtonCallback(self, pdu, outlet):
-        thread = threading.Thread(target=self.PowerOffOutlet, args=[pdu, outlet])
-        thread.start()
+        outlet.powerSliderSwitch.configure(state=customtkinter.NORMAL)
+        if error:
+            outlet.powerStatusLabel.configure(text='?', text_color='black')
+            outlet.powerSliderSwitch.deselect()
+
+    def PowerSliderSwitchCallback(self, pdu, outlet):
+        if outlet.powerSliderSwitchVar.get() == PWR_ON:
+            thread = threading.Thread(target=self.PowerOnOutlet, args=[pdu, outlet])
+            thread.start()
+        elif outlet.powerSliderSwitchVar.get() == PWR_OFF:
+            thread = threading.Thread(target=self.PowerOffOutlet, args=[pdu, outlet])
+            thread.start()
 
     def PowerCycleOutlet(self, pdu, outlet):
-        outlet.powerCycleButton.configure(state=customtkinter.DISABLED, fg_color='gray')
+        outlet.powerSliderSwitch.configure(state=customtkinter.DISABLED)
+        outlet.powerCycleButton.configure(state=customtkinter.DISABLED, fg_color='white')
         try:
             outlets = MiscLib.RunThreadWithReturnValueBlocking(function=pdu.outletController.ConnectToPdu, timeout=TIMEOUT_SECONDS)
             if outlet.number > len(outlets):
@@ -400,9 +462,9 @@ class PduOutletController:
                                      windowWidthHeight='350x75',
                                      message='Outlet number {0} is exceeding the maximum limit {1}'.format(outlet.number, len(outlets)))
                 return
-            outlet.powerStatusLabel.configure(text='OFF', text_color='red')
+            outlet.powerStatusLabel.configure(text=PWR_OFF, text_color='red')
             pdu.outletController.PowerCycleOutlet(outlets[outlet.number - 1])
-            outlet.powerStatusLabel.configure(text='ON', text_color='green')
+            outlet.powerStatusLabel.configure(text=PWR_ON, text_color='green')
         except (MiscLib.TimeoutException, RaritanPduException) as message:
             outlet.powerStatusLabel.configure(text='?', text_color='black')
             ipAddress, username, password = pdu.outletController.GetConnectionInfo()
@@ -414,7 +476,9 @@ class PduOutletController:
             self.OpenPopUpWindow(title='Error',
                                  windowWidthHeight='{}x75'.format(self.applicationWidth),
                                  message='Unknown exception occurred')
-        outlet.powerCycleButton.configure(state=customtkinter.NORMAL, fg_color=self.applicationTheme.buttonActiveColor)
+
+        outlet.powerSliderSwitch.configure(state=customtkinter.NORMAL)
+        outlet.powerCycleButton.configure(state=customtkinter.NORMAL, fg_color='transparent')
 
     def PowerCycleButtonCallback(self, pdu, outlet):
         thread = threading.Thread(target=self.PowerCycleOutlet, args=[pdu, outlet])
