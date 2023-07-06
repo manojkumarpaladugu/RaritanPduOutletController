@@ -172,7 +172,7 @@ class PduOutletController:
             groupFrame = customtkinter.CTkFrame(pduFrame,
                                                 corner_radius=5,
                                                 fg_color=self.applicationTheme.groupFrame)
-            groupFrame.grid(row=pduRow, column=0, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
+            groupFrame.grid(row=pduRow, column=0, padx=10, pady=10, sticky=customtkinter.W+customtkinter.E)
             pduRow += 1
 
             outletHeaderLabel = customtkinter.CTkLabel(groupFrame,

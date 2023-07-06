@@ -7,6 +7,7 @@ New-Variable OUT_ASSETS_DIR "$BIN_DIR\assets"                         -Option Re
 New-Variable CLI_APP_NAME   'RaritanPduOutletController_Cli'          -Option ReadOnly
 New-Variable GUI_APP_NAME   'RaritanPduOutletController_Gui'          -Option ReadOnly
 New-Variable ICON_FILE      "$ASSETS_DIR\PlugSocket.ico"              -Option ReadOnly
+New-Variable CYCLE_IMG      "$ASSETS_DIR\Cycle.png"                   -Option ReadOnly
 
 "----------------------------------------------"
 "-> Building $CLI_APP_NAME.exe"
@@ -31,6 +32,7 @@ pyinstaller                              `
     --distpath $BIN_DIR                  `
     --name $GUI_APP_NAME                 `
     --add-data "$ICON_FILE;assets"       `
+    --add-data "$CYCLE_IMG;assets"       `
     --icon=$ICON_FILE                    `
     --collect-all customtkinter          `
     --noconfirm                          `
