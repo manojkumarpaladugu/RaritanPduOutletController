@@ -475,7 +475,7 @@ class PduOutletController:
         except (MiscLib.TimeoutException, RaritanPduException) as message:
             ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
-                                 windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                 windowWidthHeight='{}x100'.format(self.applicationWidth),
                                  message='{0}\nIP={1}\nUsername={2}\nPassword={3}'.format(message, ipAddress, username, password))
             error = True
         except:
