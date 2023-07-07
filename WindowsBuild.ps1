@@ -9,6 +9,12 @@ New-Variable GUI_APP_NAME   'RaritanPduOutletController_Gui'          -Option Re
 New-Variable ICON_FILE      "$ASSETS_DIR\PlugSocket.ico"              -Option ReadOnly
 New-Variable CYCLE_IMG      "$ASSETS_DIR\Cycle.png"                   -Option ReadOnly
 
+# Clean the output directory
+if ('clean' -eq $args)
+{
+    Remove-Item $OUT_DIR -Recurse
+}
+
 "----------------------------------------------"
 "-> Building $CLI_APP_NAME.exe"
 "----------------------------------------------"
