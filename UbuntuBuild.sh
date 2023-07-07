@@ -11,7 +11,7 @@ CYCLE_IMG=$ASSETS_DIR/Cycle.png
 
 # Clean the output directory
 if [ $1 = "clean" ]; then
-    rm -rf _out
+    rm -rf $OUT_DIR
 fi
 
 echo "------------------------------------------"
