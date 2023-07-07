@@ -7,6 +7,12 @@ BIN_DIR=$OUT_DIR/RaritanPduOutletController_Ubuntu
 OUT_ASSETS_DIR=$BIN_DIR/assets
 CLI_APP_NAME='RaritanPduOutletController_Cli'
 GUI_APP_NAME='RaritanPduOutletController_Gui'
+CYCLE_IMG=$ASSETS_DIR/Cycle.png
+
+# Clean the output directory
+if [ $1 = "clean" ]; then
+    rm -rf _out
+fi
 
 echo "------------------------------------------"
 echo "-> Building $CLI_APP_NAME"
@@ -29,6 +35,7 @@ pyinstaller                            \
     --specpath $OUT_DIR/$GUI_APP_NAME  \
     --distpath $BIN_DIR                \
     --name $GUI_APP_NAME               \
+    --add-data $CYCLE_IMG:assets       \
     --collect-all customtkinter        \
     --noconfirm                        \
     --onefile                          \
@@ -40,6 +47,6 @@ mkdir $OUT_ASSETS_DIR
 cp $ASSETS_DIR/AppConfig.json        $OUT_ASSETS_DIR/AppConfig.json
 cp $ASSETS_DIR/PduOutletConfig.json  $OUT_ASSETS_DIR/PduOutletConfig.json
 
-# cleaning up
+# Cleaning up intermediate files
 rm -rf $OUT_DIR/$CLI_APP_NAME
 rm -rf $OUT_DIR/$GUI_APP_NAME

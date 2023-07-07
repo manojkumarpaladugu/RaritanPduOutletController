@@ -22,7 +22,8 @@ pip3 install tk
 sudo pip3 install raritan
 sudo pip3 install customtkinter
 sudo pip3 install pyinstaller
-sudo pip3 install Pillow
+sudo apt install python3-pil
+sudo apt install python3-pil.imagetk
 sudo apt-get install python3-tk
 ~~~
 
