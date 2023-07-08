@@ -22,9 +22,8 @@ pip3 install tk
 sudo pip3 install raritan
 sudo pip3 install customtkinter
 sudo pip3 install pyinstaller
-sudo apt install python3-pil
-sudo apt install python3-pil.imagetk
 sudo apt-get install python3-tk
+sudo apt-get install python3-pil python3-pil.imagetk
 ~~~
 
 ## Generate Executable

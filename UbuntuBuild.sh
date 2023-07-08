@@ -37,6 +37,7 @@ pyinstaller                            \
     --name $GUI_APP_NAME               \
     --add-data $CYCLE_IMG:assets       \
     --collect-all customtkinter        \
+    --collect-all PIL                  \
     --noconfirm                        \
     --onefile                          \
     --windowed                         \
