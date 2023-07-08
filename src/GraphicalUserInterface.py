@@ -44,7 +44,7 @@ class PowerDistributionUnit:
     outletGroups     : dict
 
 class PduOutletController:
-    def __init__(self):
+    def Initialize(self):
         appConfig              = self.LoadConfiguration(APP_CONFIGURATION_FILE)
         self.applicationName   = 'Raritan PDU Outlet Controller'
         self.applicationWidth  = appConfig['Application']['Width']
@@ -63,7 +63,7 @@ class PduOutletController:
         relativePath           = appConfig['Application']['PDU Configuration'].split(';')[-1]
         fileName               = appConfig['Application']['PDU Configuration'].split(';')[-2]
         self.pduConfigFile     = os.path.join(relativePath, fileName)
-        self.gui               = customtkinter.CTk()
+        self.pduFrameList      = []
 
     def LoadConfiguration(self, fileName):
         with open(fileName, "r") as jsonFile:
@@ -100,59 +100,18 @@ class PduOutletController:
                                                          groupMap)
 
     def RunMainLoop(self):
-        self.PopulatePduOutlets()
+        self.Initialize()
+        self.gui = customtkinter.CTk()
         self.gui.bind('<Visibility>', self.GenerateWindow())
         self.gui.mainloop()
 
-    def GenerateWindow(self):
-        self.gui.unbind('<Visibility>')
-        customtkinter.set_appearance_mode('light')     # system (default), dark, light
-        customtkinter.set_default_color_theme('dark-blue')  # Themes: "blue" (standard), "green", "dark-blue"
-        self.gui.title(self.applicationName)
-        self.gui.resizable(False, False)
-        if os.name == 'nt': # Windows OS
-            self.gui.wm_iconbitmap(self.applicationIcon)
-
-        self.outletNameLabelWidth = 1
-
-        staticFrame = customtkinter.CTkFrame(self.gui,
-                                             width=self.applicationWidth,
-                                             corner_radius=0,
-                                             bg_color=self.applicationTheme.staticFrame,
-                                             fg_color=self.applicationTheme.staticFrame)
-        staticFrame.grid(row=0, column=0, sticky=customtkinter.W+customtkinter.E)
-
-        self.refreshButton = customtkinter.CTkButton(staticFrame,
-                                                     text='Refresh',
-                                                     width=self.applicationWidth / 2,
-                                                     height=20,
-                                                     command=self.RefreshButtonCallback,
-                                                     cursor='hand2')
-        self.refreshButton.grid(row=0, column=0, padx=5, sticky=customtkinter.W+customtkinter.E)
-
-        self.aboutButton = customtkinter.CTkButton(staticFrame,
-                                                   text='About',
-                                                   width=self.applicationWidth / 2,
-                                                   height=20,
-                                                   command=self.AboutButtonCallback,
-                                                   cursor='hand2')
-        self.aboutButton.grid(row=0, column=1, padx=5, sticky=customtkinter.W+customtkinter.E)
-
-        verticalScrollableFrame = customtkinter.CTkScrollableFrame(self.gui,
-                                                                   width=self.applicationWidth,
-                                                                   height=self.applicationHeight,
-                                                                   corner_radius=0,
-                                                                   bg_color=self.applicationTheme.scrollableFrame,
-                                                                   fg_color=self.applicationTheme.scrollableFrame,
-                                                                   scrollbar_button_color='#b5bbbd',
-                                                                   scrollbar_button_hover_color='#7d888c',
-                                                                   orientation='vertical')
-        verticalScrollableFrame.grid(row=1, column=0, sticky=customtkinter.W+customtkinter.E)
+    def AddPduOutletsToWindow(self):
+        self.PopulatePduOutlets()
 
         scrollbarRow = 0
         for pduName, pduMap in self.pduMap.items():
             # Create PDU frame
-            pduFrame = customtkinter.CTkFrame(verticalScrollableFrame,
+            pduFrame = customtkinter.CTkFrame(self.verticalScrollableFrame,
                                               corner_radius=5,
                                               fg_color=self.applicationTheme.pduFrame)
             pduFrame.grid(row=scrollbarRow, column=0, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
@@ -273,7 +232,73 @@ class PduOutletController:
                     if (outletNameLabel.winfo_width() - 15) > self.outletNameLabelWidth:
                         self.outletNameLabelWidth = outletNameLabel.winfo_width() - 15
 
+            self.pduFrameList.append(pduFrame)
+
         self.RefreshButtonCallback()
+
+    def GenerateWindow(self):
+        self.gui.unbind('<Visibility>')
+        customtkinter.set_appearance_mode('light')     # system (default), dark, light
+        customtkinter.set_default_color_theme('dark-blue')  # Themes: "blue" (standard), "green", "dark-blue"
+        self.gui.title(self.applicationName)
+        self.gui.resizable(False, False)
+        if os.name == 'nt': # Windows OS
+            self.gui.wm_iconbitmap(self.applicationIcon)
+        self.outletNameLabelWidth = 1
+
+        staticFrame = customtkinter.CTkFrame(self.gui,
+                                             width=self.applicationWidth,
+                                             corner_radius=0,
+                                             bg_color=self.applicationTheme.staticFrame,
+                                             fg_color=self.applicationTheme.staticFrame)
+        staticFrame.grid(row=0, column=0, sticky=customtkinter.W+customtkinter.E)
+
+        staticFramButtonWidth = (self.applicationWidth / 4) - 5
+
+        self.refreshButton = customtkinter.CTkButton(staticFrame,
+                                                     text='Refresh',
+                                                     width=staticFramButtonWidth,
+                                                     height=20,
+                                                     command=self.RefreshButtonCallback,
+                                                     cursor='hand2')
+        self.refreshButton.grid(row=0, column=0, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
+
+        self.configButton = customtkinter.CTkButton(staticFrame,
+                                                    text='Configure',
+                                                    width=staticFramButtonWidth,
+                                                    height=20,
+                                                    command=self.ConfigButtonCallback,
+                                                    cursor='hand2')
+        self.configButton.grid(row=0, column=1, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
+
+        self.settingsButton = customtkinter.CTkButton(staticFrame,
+                                                      text='Settings',
+                                                      width=staticFramButtonWidth,
+                                                      height=20,
+                                                      command=self.SettingsButtonCallback,
+                                                      cursor='hand2')
+        self.settingsButton.grid(row=0, column=2, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
+
+        self.aboutButton = customtkinter.CTkButton(staticFrame,
+                                                   text='About',
+                                                   width=staticFramButtonWidth,
+                                                   height=20,
+                                                   command=self.AboutButtonCallback,
+                                                   cursor='hand2')
+        self.aboutButton.grid(row=0, column=3, padx=5, pady=5, sticky=customtkinter.W+customtkinter.E)
+
+        self.verticalScrollableFrame = customtkinter.CTkScrollableFrame(self.gui,
+                                                                        width=self.applicationWidth,
+                                                                        height=self.applicationHeight,
+                                                                        corner_radius=0,
+                                                                        bg_color=self.applicationTheme.scrollableFrame,
+                                                                        fg_color=self.applicationTheme.scrollableFrame,
+                                                                        scrollbar_button_color='#b5bbbd',
+                                                                        scrollbar_button_hover_color='#7d888c',
+                                                                        orientation='vertical')
+        self.verticalScrollableFrame.grid(row=1, column=0, sticky=customtkinter.W+customtkinter.E)
+
+        self.AddPduOutletsToWindow()
 
     def OpenPopUpWindow(self, title, windowWidthHeight, message):
         popUpWindow = customtkinter.CTkToplevel(self.gui)
@@ -315,13 +340,34 @@ class PduOutletController:
             except (MiscLib.TimeoutException, RaritanPduException) as message:
                 ipAddress, username, password = pdu.outletController.GetConnectionInfo()
                 self.OpenPopUpWindow(title='Error',
-                                    windowWidthHeight='{}x100'.format(self.applicationWidth),
+                                    windowWidthHeight='200x100',
                                     message='{0}\nIP={1}\nUsername={2}\nPassword={3}'.format(message, ipAddress, username, password))
             except:
                 self.OpenPopUpWindow(title='Error',
-                                    windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                    windowWidthHeight='250x75',
                                     message='Unknown exception occurred')
                 continue
+
+    def RemovePduFrames(self):
+        for pduFrame in self.pduFrameList:
+            pduFrame.grid_remove()
+        self.pduFrameList = []
+
+    def ConfigButtonCallback(self):
+        md5_before_file_update = MiscLib.GetMd5OfFile(self.pduConfigFile)
+        MiscLib.StartFile(self.pduConfigFile)
+        md5_after_file_update = MiscLib.GetMd5OfFile(self.pduConfigFile)
+        if md5_after_file_update != md5_before_file_update:
+            self.RemovePduFrames()
+            self.AddPduOutletsToWindow()
+
+    def SettingsButtonCallback(self):
+        md5_before_file_update = MiscLib.GetMd5OfFile(APP_CONFIGURATION_FILE)
+        MiscLib.StartFile(APP_CONFIGURATION_FILE)
+        md5_after_file_update = MiscLib.GetMd5OfFile(APP_CONFIGURATION_FILE)
+        if md5_after_file_update != md5_before_file_update:
+            self.gui.destroy()
+            self.RunMainLoop()
 
     def OpenUrl(self, url):
         webbrowser.open_new_tab(url)
@@ -404,12 +450,12 @@ class PduOutletController:
             error = True
             ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
-                                 windowWidthHeight='{}x100'.format(self.applicationWidth),
+                                 windowWidthHeight='200x100',
                                  message='{0}\nIP={1}\nUsername={2}\nPassword={3}'.format(message, ipAddress, username, password))
         except:
             error = True
             self.OpenPopUpWindow(title='Error',
-                                 windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                 windowWidthHeight='250x75',
                                  message='Unknown exception occurred')
 
         outlet.powerSliderSwitch.configure(state=customtkinter.NORMAL)
@@ -434,12 +480,12 @@ class PduOutletController:
             error = True
             ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
-                                 windowWidthHeight='{}x100'.format(self.applicationWidth),
+                                 windowWidthHeight='200x100',
                                  message='{0}\nIP={1}\nUsername={2}\nPassword={3}'.format(message, ipAddress, username, password))
         except:
             error = True
             self.OpenPopUpWindow(title='Error',
-                                 windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                 windowWidthHeight='250x75',
                                  message='Unknown exception occurred')
 
         outlet.powerSliderSwitch.configure(state=customtkinter.NORMAL)
@@ -475,12 +521,12 @@ class PduOutletController:
         except (MiscLib.TimeoutException, RaritanPduException) as message:
             ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
-                                 windowWidthHeight='{}x100'.format(self.applicationWidth),
+                                 windowWidthHeight='200x100',
                                  message='{0}\nIP={1}\nUsername={2}\nPassword={3}'.format(message, ipAddress, username, password))
             error = True
         except:
             self.OpenPopUpWindow(title='Error',
-                                 windowWidthHeight='{}x75'.format(self.applicationWidth),
+                                 windowWidthHeight='250x75',
                                  message='Unknown exception occurred')
             error = True
 

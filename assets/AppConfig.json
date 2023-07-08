@@ -1,7 +1,7 @@
 {
     "Application" : {
-        "Width"  : 365,
-        "Height" : 500,
+        "Width"  : 367,
+        "Height" : 400,
         "Icon"   : "PlugSocket.ico;assets",
         "Theme"  : {
             "Static Frame"     : "white",

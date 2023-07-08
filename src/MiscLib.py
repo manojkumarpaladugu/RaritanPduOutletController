@@ -1,4 +1,7 @@
+import os
+import hashlib
 import threading
+import subprocess
 
 class TimeoutException(Exception): pass
 
@@ -33,3 +36,15 @@ def RunThreadWithReturnValueBlocking(function, arguments=[], timeout=0):
     if twrv.is_alive():
         raise TimeoutException('Connection timed out')
     return result
+
+def GetMd5OfFile(file):
+    with open(file, "rb") as f:
+        file_hash = hashlib.md5()
+        while chunk := f.read(8192):
+            file_hash.update(chunk)
+    return file_hash.hexdigest()
+
+def StartFile(file):
+    if os.name == 'nt': # Windows OS
+        command = 'notepad.exe {}'.format(file)
+        subprocess.run(command, check=True, stdout=subprocess.DEVNULL)
