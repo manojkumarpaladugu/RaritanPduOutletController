@@ -153,7 +153,7 @@ class PduOutletController:
             statusHeaderLabel.grid(row=groupRow, column=2, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
 
             offOnHeaderLabel = customtkinter.CTkLabel(groupFrame,
-                                                        text='Off .. On',
+                                                        text='Switch',
                                                         text_color=self.applicationTheme.groupFrameText,
                                                         font=customtkinter.CTkFont(weight='bold'))
             offOnHeaderLabel.grid(row=groupRow, column=3, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)

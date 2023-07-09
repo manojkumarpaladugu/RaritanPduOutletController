@@ -48,3 +48,6 @@ def StartFile(file):
     if os.name == 'nt': # Windows OS
         command = 'notepad.exe {}'.format(file)
         subprocess.run(command, check=True, stdout=subprocess.DEVNULL)
+    else: # Ubuntu OS
+        proc = subprocess.Popen(['gedit', file])
+        proc.wait()
