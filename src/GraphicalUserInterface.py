@@ -340,7 +340,7 @@ class PduOutletController:
             except (MiscLib.TimeoutException, RaritanPduException) as message:
                 ipAddress, username, password = pdu.outletController.GetConnectionInfo()
                 self.OpenPopUpWindow(title='Error',
-                                    windowWidthHeight='200x100',
+                                    windowWidthHeight='250x120',
                                     message='{0}\nIP={1}\nUsername={2}\nPassword={3}'.format(message, ipAddress, username, password))
             except:
                 self.OpenPopUpWindow(title='Error',
@@ -450,7 +450,7 @@ class PduOutletController:
             error = True
             ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
-                                 windowWidthHeight='200x100',
+                                 windowWidthHeight='250x120',
                                  message='{0}\nIP={1}\nUsername={2}\nPassword={3}'.format(message, ipAddress, username, password))
         except:
             error = True
@@ -480,7 +480,7 @@ class PduOutletController:
             error = True
             ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
-                                 windowWidthHeight='200x100',
+                                 windowWidthHeight='250x120',
                                  message='{0}\nIP={1}\nUsername={2}\nPassword={3}'.format(message, ipAddress, username, password))
         except:
             error = True
@@ -521,7 +521,7 @@ class PduOutletController:
         except (MiscLib.TimeoutException, RaritanPduException) as message:
             ipAddress, username, password = pdu.outletController.GetConnectionInfo()
             self.OpenPopUpWindow(title='Error',
-                                 windowWidthHeight='200x100',
+                                 windowWidthHeight='250x120',
                                  message='{0}\nIP={1}\nUsername={2}\nPassword={3}'.format(message, ipAddress, username, password))
             error = True
         except:
