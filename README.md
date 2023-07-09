@@ -57,6 +57,11 @@ _out\RaritanPduOutletController_Ubuntu\RaritanPduOutletController_Cli
 <img src="https://github.com/manojkumarpaladugu/RaritanPduOutletController/blob/main/assets/RaritanPduOutletController_Cli.jpg" width="600"/>
 
 ## Release Notes
+> ## v1.0.5 (July/09/2023)
+> 
+> - Added buttons to modify configurations
+> - Updated user interface
+
 > ## v1.0.4 (July/08/2023)
 > 
 > - Replaced seperate On/Off buttons with a single slider switch
