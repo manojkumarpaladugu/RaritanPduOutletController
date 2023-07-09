@@ -135,31 +135,31 @@ class PduOutletController:
             pduRow += 1
 
             outletHeaderLabel = customtkinter.CTkLabel(groupFrame,
-                                                        text='Outlet',
+                                                        text='| Outlet |',
                                                         text_color=self.applicationTheme.groupFrameText,
                                                         font=customtkinter.CTkFont(weight='bold'))
             outletHeaderLabel.grid(row=groupRow, column=0, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
 
             nameHeaderLabel = customtkinter.CTkLabel(groupFrame,
-                                                        text='Name',
+                                                        text='| Name |',
                                                         text_color=self.applicationTheme.groupFrameText,
                                                         font=customtkinter.CTkFont(weight='bold'))
             nameHeaderLabel.grid(row=groupRow, column=1, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
 
             statusHeaderLabel = customtkinter.CTkLabel(groupFrame,
-                                                        text='Status',
+                                                        text='| Status |',
                                                         text_color=self.applicationTheme.groupFrameText,
                                                         font=customtkinter.CTkFont(weight='bold'))
             statusHeaderLabel.grid(row=groupRow, column=2, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
 
-            offOnHeaderLabel = customtkinter.CTkLabel(groupFrame,
-                                                        text='Switch',
-                                                        text_color=self.applicationTheme.groupFrameText,
-                                                        font=customtkinter.CTkFont(weight='bold'))
-            offOnHeaderLabel.grid(row=groupRow, column=3, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
+            switchHeaderLabel = customtkinter.CTkLabel(groupFrame,
+                                                       text='| Switch |',
+                                                       text_color=self.applicationTheme.groupFrameText,
+                                                       font=customtkinter.CTkFont(weight='bold'))
+            switchHeaderLabel.grid(row=groupRow, column=3, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
 
             cycleHeaderLabel = customtkinter.CTkLabel(groupFrame,
-                                                        text='Cycle',
+                                                        text='| Cycle |',
                                                         text_color=self.applicationTheme.groupFrameText,
                                                         font=customtkinter.CTkFont(weight='bold'))
             cycleHeaderLabel.grid(row=groupRow, column=4, padx=10, pady=5, sticky=customtkinter.W+customtkinter.E)
