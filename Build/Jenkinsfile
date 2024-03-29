@@ -1,0 +1,11 @@
+pipeline {
+    agent { docker 'rpoc:v0' }
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Hello World'
+                ./UbuntuBuild.sh
+            }
+        }
+    }
+}
