@@ -1,15 +1,49 @@
+def dockerImageName='rpoc:latest'
+def artifactsPath='_out/RaritanPduOutletController_Ubuntu'
+
 pipeline {
-    agent {
-        dockerfile {
-            dir         'Build'
-            filename    'Dockerfile'
-        } // Use Dockerfile as the agent for the pipeline
-    }
+    agent any
     stages {
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                sh './UbuntuBuild.sh'
+                script {
+                    def dockerImage = docker.build(dockerImageName, "Build")
+                }
             }
+        }
+
+        stage('Build Application') {
+            agent {
+                docker {
+                    image dockerImageName
+                }
+            }
+            steps {
+                script {
+                    sh './UbuntuBuild.sh'
+                }
+            }
+        }
+
+        stage('Archive Artifacts') {
+            agent {
+                docker {
+                    image dockerImageName
+                }
+            }
+            steps {
+                dir(artifactsPath) {
+                    archiveArtifacts artifacts: '**'
+                }
+            }
+        }
+
+        stage('Clean') {
+          steps{
+            // Cleanup workspace
+            cleanWs()
+            sh "docker rmi $dockerImageName"
+          }
         }
     }
 }
