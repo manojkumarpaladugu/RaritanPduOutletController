@@ -1,0 +1,16 @@
+pipeline {
+    agent {
+        dockerfile {
+            dir         'Build'
+            filename    'Dockerfile'
+            label       'rpoc:build'
+        } // Use Dockerfile as the agent for the pipeline
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh './UbuntuBuild.sh'
+            }
+        }
+    }
+}
