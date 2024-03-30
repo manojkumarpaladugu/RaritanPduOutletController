@@ -1,9 +1,9 @@
 pipeline {
-    agent any
+    agent { dockerfile true } // Use Dockerfile as the agent for the pipeline
     stages {
         stage('Build') {
             steps {
-                echo 'Hello World'
+                sh './UbuntuBuild.sh'
             }
         }
     }
